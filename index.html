@@ -66,6 +66,25 @@ button.pix:active:not([aria-disabled="true"]){transform:translateY(var(--u));--d
 .fever{align-self:center;padding:4px 14px;white-space:nowrap;animation:fev .5s steps(1) infinite}
 @keyframes fev{50%{--bg:var(--gold-hi)}}
 .fever b{font-weight:400;font-variant-numeric:tabular-nums}
+/* HUD 11/16：1段目は お金（2行・ボタンと同じ48px）＋ボタン、2段目は細いめあて */
+.hud{gap:8px;padding-top:calc(env(safe-area-inset-top,0px) + 10px)}
+.hud-row{align-items:center}
+.wallet{padding:0;gap:8px;height:max(44px,calc(var(--px)*16))}
+.amt{line-height:32px}
+.rate{line-height:16px;margin-top:0}
+.wallet,.quest{--o:#20140a;color:#fff3d6;text-shadow:var(--ux) 0 0 var(--o),calc(var(--ux)*-1) 0 0 var(--o),0 var(--ux) 0 var(--o),0 calc(var(--ux)*-1) 0 var(--o),var(--ux) var(--ux) 0 var(--o),calc(var(--ux)*-1) var(--ux) 0 var(--o),var(--ux) calc(var(--ux)*-1) 0 var(--o),calc(var(--ux)*-1) calc(var(--ux)*-1) 0 var(--o)}
+.wallet .rate{color:#c4f29c}
+.wallet.hurt{animation:hurt2 .4s steps(6)}
+.wallet.hurt #coins{color:#ff9d88}
+@keyframes hurt2{20%{transform:translateX(calc(var(--px)*-2))}40%{transform:translateX(calc(var(--px)*2))}60%{transform:translateX(calc(var(--px)*-1))}100%{transform:none}}
+.quest{grid-template-columns:auto minmax(0,1fr) auto auto;gap:4px 8px;padding:6px 10px 7px;width:100%;min-width:0;max-width:min(430px,100%);background:rgba(24,16,8,.62)}
+.quest .qtag{grid-row:1;grid-column:1;background:var(--gold);color:var(--ink);text-shadow:none;padding:0 6px;line-height:1.35}
+#qText{grid-row:1;grid-column:2;line-height:1.3}
+#qProg{grid-row:1;grid-column:3;color:#e6d4ae}
+#qRew{grid-row:1;grid-column:4;color:var(--gold)}
+.qbar{grid-row:2;grid-column:1/-1;margin:0 var(--ux)}
+.quest.done{animation:qdone2 .6s steps(4)}
+@keyframes qdone2{0%,50%{background:rgba(255,205,60,.5)}}
 .toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 178px);z-index:40;transform:translate(-50%,calc(var(--px)*-3));opacity:0;padding:6px 14px;max-width:calc(100% - 32px);width:max-content;text-align:center;line-height:1.4;text-wrap:balance;pointer-events:none;transition:opacity .2s steps(3),transform .2s steps(3)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .toast.dr{top:auto!important;bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
@@ -270,7 +289,7 @@ button.pix:active:not([aria-disabled="true"]){transform:translateY(var(--u));--d
 
 <header class="hud">
   <div class="hud-row">
-    <div class="wallet pix" id="wallet">
+    <div class="wallet" id="wallet">
       <img class="pi" id="walletCoin" data-icon="coin" alt="">
       <div class="wnum"><div class="amt"><b id="coins">0</b><span class="yen">円</span></div><span class="rate" id="rate">毎秒 +0円</span></div>
     </div>
@@ -279,7 +298,7 @@ button.pix:active:not([aria-disabled="true"]){transform:translateY(var(--u));--d
       <button class="sq pix" id="menuBtn" type="button" aria-label="メニュー"><img class="pi" data-icon="gear" alt=""></button>
     </div>
   </div>
-  <div class="quest pix" id="quest"><span class="qtag">めあて</span><span id="qText">芋を10こ出荷する</span><span id="qRew"></span><span class="qbar"><i id="qFill"></i></span><span id="qProg">0/10</span></div>
+  <div class="quest" id="quest"><span class="qtag">めあて</span><span id="qText">芋を10こ出荷する</span><span id="qRew"></span><span class="qbar"><i id="qFill"></i></span><span id="qProg">0/10</span></div>
   <div class="fever pix gold" id="fever" hidden><span id="feverName">フィーバー！</span> <b id="feverM">5</b>倍 あと <b id="feverT">20</b>秒</div>
 </header>
 <div class="toast pix" id="toast" role="status" aria-live="polite"></div>
@@ -397,7 +416,7 @@ button.pix:active:not([aria-disabled="true"]){transform:translateY(var(--u));--d
   <div class="logo"><span class="l1">ぽいっと！</span><span class="l2">いも工場</span></div>
   <div class="tpots" id="tpots"></div>
   <p class="tap">タップしてはじめる</p>
-  <p class="tver">ver 1.0</p>
+  <p class="tver">ver 1.1</p>
 </div>
 
 <script>
@@ -1744,7 +1763,7 @@ function resize(){
   cachePos(); requestAnimationFrame(cachePos);
 }
 function layout(){
-  const RAIL = 8, inner = Math.min(AW - RAIL*2, 128);
+  const RAIL = 8, WALK = 10, inner = Math.min(AW - RAIL*2 - WALK*2, 128);
   G.x0 = Math.floor((AW - inner - RAIL*2)/2); G.ix0 = G.x0 + RAIL; G.ix1 = G.ix0 + inner; G.x1 = G.ix1 + RAIL;
   G.gateH = 26; G.gateY = AH - SAFE_B - G.gateH;
   G.speed = (G.gateY + 24)/9;
@@ -2126,12 +2145,12 @@ function arm(x0, y0, x1, y1){
 function drawStations(){
   const bob = ((T*2) | 0) % 2;
   if (S.bld.part){
-    const st = ST.part, y = G.st.part, x = G.ix0 - 9;
-    lc.fillStyle = '#15171c'; lc.fillRect(x + 1, y + 3, 18, 4); lc.fillStyle = '#8a93a1'; lc.fillRect(x + 2, y + 3, 16, 1); lc.fillStyle = '#5c6370'; lc.fillRect(x + 2, y + 4, 16, 2);
+    const st = ST.part, y = G.st.part, x = G.x0 - 13;
+    lc.fillStyle = '#15171c'; lc.fillRect(x + 4, y + 3, 12, 4); lc.fillStyle = '#8a93a1'; lc.fillRect(x + 5, y + 3, 10, 1); lc.fillStyle = '#5c6370'; lc.fillRect(x + 5, y + 4, 10, 2);
     lc.drawImage(ART.worker(st.anim > 0 ? 1 : 0), x, y - 16 + (st.anim > 0 ? 0 : bob));
   }
   if (S.bld.air){
-    const st = ST.air, y = G.st.air, x = G.ix1 - 13;
+    const st = ST.air, y = G.st.air, x = G.x1 - 5;
     lc.drawImage(ART.airBox(), x, y - 9);
     if (st.anim > 0){
       const k = 1 - st.anim/.3, nx = x + 1, len = Math.max(4, (nx - st.tx)*Math.min(1, k*1.6));
@@ -2141,7 +2160,7 @@ function drawStations(){
     }
   }
   if (S.bld.robo){
-    const st = ST.robo, y = G.st.robo, x = G.ix0 - 7, pvx = x + 8, pvy = y - 3;
+    const st = ST.robo, y = G.st.robo, x = G.x0 - 11, pvx = x + 8, pvy = y - 3;
     let ex = pvx + 10, ey = pvy - 3;
     if (st.anim > 0){ const k = Math.sin(Math.PI*(1 - st.anim/.36)); ex = pvx + 10 + (st.tx - pvx - 10)*k; ey = pvy - 3 + (st.ty - pvy + 3)*k; }
     const mx = (pvx + ex)/2, my = Math.min(pvy, ey) - 7;
@@ -2193,10 +2212,10 @@ function drawOverlay(){
   ctx.fillText('出荷', Math.round(G.plateX*A), Math.round((G.gateY + G.plateY)*A));
   if (!titleOn){
     const lab = [];
-    if (S.bld.part) lab.push([G.ix0 + 10, G.st.part - 17, S.bld.part]);
-    if (S.bld.air) lab.push([G.ix1 - 6, G.st.air - 13, S.bld.air]);
-    if (S.bld.robo) lab.push([G.ix0 + 7, G.st.robo + 7, S.bld.robo]);
-    for (const [x, y, n] of lab){ if (n < 2) continue; const s = '×' + n; ctx.lineWidth = 4; ctx.strokeStyle = '#1a120c'; ctx.strokeText(s, Math.round(x*A), Math.round(y*A)); ctx.fillStyle = '#fff3d0'; ctx.fillText(s, Math.round(x*A), Math.round(y*A)); }
+    if (S.bld.part) lab.push([G.x0 - 4, G.st.part - 20, S.bld.part]);
+    if (S.bld.air) lab.push([G.x1 + 4, G.st.air - 14, S.bld.air]);
+    if (S.bld.robo) lab.push([G.x0 - 5, G.st.robo + 7, S.bld.robo]);
+    for (const [x0, y, n] of lab){ if (n < 2) continue; const s = '×' + n, hw = (8 + 4*(s.length - 1))/A + 2, x = clamp(x0, hw, AW - hw); ctx.lineWidth = 4; ctx.strokeStyle = '#1a120c'; ctx.strokeText(s, Math.round(x*A), Math.round(y*A)); ctx.fillStyle = '#fff3d0'; ctx.fillText(s, Math.round(x*A), Math.round(y*A)); }
   }
   for (const t of texts){
     const k = t.life/t.max, x = Math.round(t.x*A), y = Math.round((t.y - k*14)*A);
@@ -2629,7 +2648,7 @@ function renderTitlePots(){ $('tpots').innerHTML = ['futsu', 'heart', 'me'].map(
 function startGame(){
   if (!titleOn) return;
   ensureAudio(); titleOn = false; $('title').hidden = true;
-  pots = pots.filter(p => p.y > 0); spawnT = .4;
+  pots = []; spawnT = .4;
   if (!S.seenHelp) openHelp(); else if (awayPend) showAway(); else if (S.stats.play > 30) toast('おかえり！工場は今日も動いてるよ', 'new');
   checkAch();
   SFX.sel(); cachePos();
@@ -2643,7 +2662,7 @@ function frame(now){
   const dt = Math.min(.05, (now - (last || now))/1000); last = now;
   T += dt;
   econTick(dt);
-  if (!paused() || titleOn) beltTick(dt);
+  if (!paused()) beltTick(dt);
   fxTick(dt);
   draw(); hudTick(dt);
   requestAnimationFrame(frame);
@@ -2653,7 +2672,6 @@ function start(data){
   recalc(); disp = S.coins;
   if (!(data && data.S)) awayPend = calcAway(S.lastSeen);
   resize(); inited = true; refreshImages(); renderAchBadge();
-  for (let i = 0; i < 6; i++){ const p = newPot(i === 2 ? 'me' : i === 4 ? 'heart' : 'futsu', 0, 0); p.x = G.ix0 + 20 + ((i*37) % Math.max(1, G.ix1 - G.ix0 - 40)); p.y = AH*(.15 + i*.13); pots.push(p); }
   renderDock(); checkGoal(); updateAfford();
   if (data && data.playing){ titleOn = false; $('title').hidden = true; }
   window.addEventListener('resize', resize);
