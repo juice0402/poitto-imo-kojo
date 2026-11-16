@@ -194,7 +194,9 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
 #shopCoins{white-space:nowrap}
 @media (max-width:360px){#shopRate{font-size:14px}.dwallet{gap:6px;padding:8px 10px}}
 .bcost{display:flex;align-items:center;gap:4px;font-variant-numeric:tabular-nums}
-.brow[data-p] .bcost,.brow[data-k] .bcost{min-width:4.2em;justify-content:flex-end}
+.brow[data-p] .bcost,.brow[data-k] .bcost,.brow[data-b] .bcost,.brow.mys .bcost{min-width:4.2em;justify-content:flex-end}
+.bnum{color:var(--ink-2);font-variant-numeric:tabular-nums}
+.btag{font-style:normal;color:var(--leaf-d)}
 .binfo{color:var(--ink-2);text-wrap:pretty}
 .bown{font-size:32px;line-height:1;color:var(--ink-2);min-width:1.2em;text-align:right;font-variant-numeric:tabular-nums}
 .stats{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;color:var(--ink-2)}
@@ -437,7 +439,7 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
   <div class="logo"><span class="l1">ぽいっと！</span><span class="l2">いも工場</span></div>
   <div class="tpots" id="tpots"></div>
   <p class="tap">タップしてはじめる</p>
-  <p class="tver">ver 1.8</p>
+  <p class="tver">ver 1.9</p>
 </div>
 
 <script>
@@ -2421,18 +2423,17 @@ function visibleBlds(){
   }
   return out;
 }
+/* 施設の行：左に名前と「いま何人（何台）」（まだ0なら何をするかの一言）、右に値段だけ（ver 1.9。毎秒いくらは上の所持金に出ているので書かない。×10などは上のボタンでわかる） */
 function bldRow(b){
-  const n = S.buy, cost = bldCost(b, n), each = b.cps*D.mult[b.id]*D.zk, tot = D.bcps[b.id]*D.zk;
+  const n = S.buy, cost = bldCost(b, n);
   return `<button type="button" class="brow pix fine" id="b-${b.id}" data-b="${b.id}">
     ${img('i:' + b.id, icoPB(b.id), A, 'bico')}
-    <span class="bmain"><span class="bname">${b.name}${n > 1 ? `<small>×${n}</small>` : ''}${b.tag ? `<em>${b.tag}</em>` : ''}</span>
-    <span class="bcost">${coinImg()}<span>${fmt(cost)}円</span></span>
-    <span class="binfo"><span class="nw">1${b.unit} +${fmtR(each)}/秒</span>${S.bld[b.id] ? ` <span class="nw">計 +${fmtR(tot)}/秒</span>` : ''}</span></span>
-    <span class="bown">${S.bld[b.id]}</span></button>`;
+    <span class="bmain"><span class="bname">${b.name}</span>${!S.bld[b.id] && b.tag ? `<em class="btag">${b.tag}</em>` : `<span class="bnum">${fmt(S.bld[b.id])}${b.unit}</span>`}</span>
+    <span class="bcost">${coinImg()}<span>${fmt(cost)}円</span></span></button>`;
 }
 function mysRow(b){
   return `<div class="brow pix fine mys" aria-disabled="true">${img('is:' + b.id, () => ART.iconSilPB(b.id), A, 'bico')}
-    <span class="bmain"><span class="bname">？？？</span><span class="bcost">${coinImg()}<span>${fmt(b.cost)}円</span></span><span class="binfo">もっとかせぐと、わかるよ</span></span><span class="bown"></span></div>`;
+    <span class="bmain"><span class="bname">？？？</span></span><span class="bcost">${coinImg()}<span>${fmt(b.cost)}円</span></span></div>`;
 }
 function renderUpgDetail(){
   const u = selUpg && UI[selUpg];
