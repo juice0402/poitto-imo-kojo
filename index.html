@@ -75,7 +75,8 @@ button.pix:active:not([aria-disabled="true"]){transform:translateY(var(--u));--d
 .wallet,.quest{--o:#20140a;color:#fff3d6;text-shadow:var(--ux) 0 0 var(--o),calc(var(--ux)*-1) 0 0 var(--o),0 var(--ux) 0 var(--o),0 calc(var(--ux)*-1) 0 var(--o),var(--ux) var(--ux) 0 var(--o),calc(var(--ux)*-1) var(--ux) 0 var(--o),var(--ux) calc(var(--ux)*-1) 0 var(--o),calc(var(--ux)*-1) calc(var(--ux)*-1) 0 var(--o)}
 .wallet .rate{color:#c4f29c}
 .wallet.hurt{animation:hurt2 .4s steps(6)}
-.wallet.hurt #coins{color:#ff9d88}
+.wallet.hurt #coins{animation:hurtc .4s steps(2)}
+@keyframes hurtc{0%,60%{color:#ff9d88}}
 @keyframes hurt2{20%{transform:translateX(calc(var(--px)*-2))}40%{transform:translateX(calc(var(--px)*2))}60%{transform:translateX(calc(var(--px)*-1))}100%{transform:none}}
 .quest{grid-template-columns:auto minmax(0,1fr) auto auto;gap:4px 8px;padding:6px 10px 7px;width:100%;min-width:0;max-width:min(430px,100%);background:rgba(24,16,8,.62)}
 .quest .qtag{grid-row:1;grid-column:1;background:var(--gold);color:var(--ink);text-shadow:none;padding:0 6px;line-height:1.35}
@@ -85,6 +86,21 @@ button.pix:active:not([aria-disabled="true"]){transform:translateY(var(--u));--d
 .qbar{grid-row:2;grid-column:1/-1;margin:0 var(--ux)}
 .quest.done{animation:qdone2 .6s steps(4)}
 @keyframes qdone2{0%,50%{background:rgba(255,205,60,.5)}}
+.quest{align-self:flex-end;pointer-events:auto;cursor:pointer}
+.quest.slin{animation:qin .22s steps(4)}
+.quest.slin.done{animation:qin .22s steps(4),qdone2 .6s steps(4)}
+.quest.slout{animation:qout .2s steps(4) forwards}
+@keyframes qin{from{transform:translateX(calc(100% + 24px))}}
+@keyframes qout{to{transform:translateX(calc(100% + 24px))}}
+.qtab{position:absolute;right:calc(var(--px)*-2);top:calc(env(safe-area-inset-top,0px) + 18px + max(44px,calc(var(--px)*16)));pointer-events:auto;min-height:44px;display:flex;flex-direction:column;justify-content:center;gap:4px;padding:4px max(14px,calc(env(safe-area-inset-right,0px) + 8px)) 6px 10px;line-height:1.2}
+.qtbar{display:block;height:var(--px);background:var(--gold-lo)}
+.qtbar i{display:block;height:100%;width:0;background:var(--ink)}
+.quest[hidden] ~ .fever{margin-top:calc(max(44px,calc(var(--px)*16)) + 8px)}
+.znew{position:absolute;top:-10px;right:-8px;padding:0 5px;line-height:1.4;color:#fff;--bg:var(--red);--h2:#ff8c74;--l2:#9e2f1c}
+.znew.hop{animation:hop .6s steps(6)}
+@keyframes hop{0%,100%{transform:none}17%{transform:translateY(calc(var(--px)*-6))}34%{transform:translateY(calc(var(--px)*-2))}50%{transform:translateY(calc(var(--px)*-4))}67%{transform:translateY(calc(var(--px)*-1))}}
+.zcell{position:relative}
+.znw{position:absolute;top:calc(var(--ux)*2);left:calc(var(--ux)*2);padding:0 4px;line-height:1.3;font-size:14px;color:#fff;background:var(--red)}
 .tip{position:fixed;z-index:6;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 14px + var(--px)*26 + 40px);padding:6px 12px;max-width:calc(100% - 32px);line-height:1.4;pointer-events:none;animation:tipb 1s steps(1) infinite}
 .tip::after{content:"";position:absolute;top:calc(100% + var(--px));right:calc(var(--px)*12);border:calc(var(--px)*3) solid transparent;border-top-color:var(--ol);border-bottom:0}
 @keyframes tipb{50%{transform:translateY(calc(var(--px)*-1))}}
@@ -105,7 +121,6 @@ button.pix:active:not([aria-disabled="true"]){transform:translateY(var(--u));--d
 .dbtn .dl{line-height:1}
 .dchip{position:absolute;bottom:calc(100% + 6px);top:auto;right:0;padding:0 6px;line-height:1.5;font-variant-numeric:tabular-nums}
 .badge{position:absolute;bottom:calc(100% + 6px);top:auto;left:0;min-width:calc(var(--px)*9);padding:0 6px;line-height:1.5;text-align:center;color:#fff;--bg:var(--red);--h2:#ff8c74;--l2:#9e2f1c}
-#zukanBtn .dchip{left:0;right:auto}
 #shopBtn .badge{left:auto;right:0}
 .badge.pr{--bg:var(--gold);--h2:var(--gold-hi);--l2:var(--gold-lo);color:var(--ink)}
 .badge.pop{animation:bpop .4s steps(4)}
@@ -301,14 +316,15 @@ button.pix:active:not([aria-disabled="true"]){transform:translateY(var(--u));--d
       <button class="sq pix" id="menuBtn" type="button" aria-label="メニュー"><img class="pi" data-icon="gear" alt=""></button>
     </div>
   </div>
-  <div class="quest" id="quest"><span class="qtag">めあて</span><span id="qText">芋を10こ出荷する</span><span id="qRew"></span><span class="qbar"><i id="qFill"></i></span><span id="qProg">0/10</span></div>
+  <div class="quest" id="quest" hidden><span class="qtag">めあて</span><span id="qText">芋を10こ出荷する</span><span id="qRew"></span><span class="qbar"><i id="qFill"></i></span><span id="qProg">0/10</span></div>
+  <button class="qtab pix gold" id="questTab" type="button" aria-label="めあてを見る" aria-expanded="false"><span>めあて</span><span class="qtbar"><i id="qTabFill"></i></span></button>
   <div class="fever pix gold" id="fever" hidden><span id="feverName">フィーバー！</span> <b id="feverM">5</b>倍 あと <b id="feverT">20</b>秒</div>
 </header>
 <div class="toast pix" id="toast" role="status" aria-live="polite"></div>
 <div class="achpop pix gold" id="achPop" role="status" aria-live="polite"><img class="pi" data-icon="trophy" alt=""><div><small>実績かいじょ！</small><b id="achPopName"></b></div></div>
 
 <nav class="dock" aria-label="工場と図鑑">
-  <button class="dbtn pix" id="zukanBtn" type="button" aria-expanded="false" aria-controls="zukanDrawer"><img class="pi" data-icon="book" alt=""><span class="dl">図鑑</span><span class="dchip pix fine flat" id="zukanCount">0/19</span></button>
+  <button class="dbtn pix" id="zukanBtn" type="button" aria-expanded="false" aria-controls="zukanDrawer"><img class="pi" data-icon="book" alt=""><span class="dl">図鑑</span><span class="znew pix fine flat" id="zukanNew" hidden>NEW</span></button>
   <button class="dbtn pix" id="shopBtn" type="button" aria-expanded="false" aria-controls="shopDrawer"><span class="badge pix fine flat" id="shopBadge" hidden>0</span><img class="pi" data-icon="factory" alt=""><span class="dl">工場</span></button>
 </nav>
 
@@ -421,7 +437,7 @@ button.pix:active:not([aria-disabled="true"]){transform:translateY(var(--u));--d
   <div class="logo"><span class="l1">ぽいっと！</span><span class="l2">いも工場</span></div>
   <div class="tpots" id="tpots"></div>
   <p class="tap">タップしてはじめる</p>
-  <p class="tver">ver 1.2</p>
+  <p class="tver">ver 1.3</p>
 </div>
 
 <script>
@@ -1682,7 +1698,7 @@ const achCount = () => ACH.filter(a => S.ach[a.id]).length;
 /* ---------- 状態 ---------- */
 const DEF = () => ({coins:0, bld:Object.fromEntries(BLD.map(b => [b.id, 0])), upg:{}, found:{}, ach:{}, achNew:0, goal:0, buy:1, lastSeen:0,
   perk:{}, seeds:0, seedsUsed:0, prestiges:0, kiseki:0, presNotified:false, bgm:true,
-  stats:{shipped:0, flicked:0, auto:0, rares:0, complaints:0, misses:0, upgs:0, blds:0, fevers:0, superFevers:0, earned:0, earnedRun:0, play:0, away:0, awayEarned:0, goldFevers:0, diaFevers:0}, sound:true, seenHelp:false, tut:0});
+  stats:{shipped:0, flicked:0, auto:0, rares:0, complaints:0, misses:0, upgs:0, blds:0, fevers:0, superFevers:0, earned:0, earnedRun:0, play:0, away:0, awayEarned:0, goldFevers:0, diaFevers:0}, sound:true, seenHelp:false, tut:0, znew:[]});
 let S = DEF();
 function merge(o){
   const d = DEF(); if (!o || typeof o !== 'object') return d;
@@ -1695,6 +1711,7 @@ function merge(o){
   for (const k in d.stats) d.stats[k] = (o.stats && +o.stats[k]) || 0;
   if (!o.stats || o.stats.earnedRun == null) d.stats.earnedRun = d.stats.earned;
   d.goal = o.goal | 0; d.buy = [1, 10, 100].includes(o.buy) ? o.buy : 1; d.sound = o.sound !== false; d.seenHelp = !!o.seenHelp;
+  d.znew = Array.isArray(o.znew) ? o.znew.filter(k => KINDS[k] && d.found[k] > 0) : [];
   d.tut = o.tut == null ? ((o.stats && (+o.stats.shipped || +o.stats.flicked)) ? 7 : 0) : (o.tut | 0);
   return d;
 }
@@ -2020,7 +2037,7 @@ function tapAt(ax, ay){
     flyOff(best, side); puff(best.x, best.y, '#ffffff', 6);
     addText(best.x, best.y - best.h/2, 'ポイッ +' + fmtR(v), '#ffffff');
     SFX.pop(); shake = Math.max(shake, .06);
-    if (first) toast(`図鑑にのった！ ${k.name}`, 'new');
+    if (first) zukanNew(best.kind);
   } else if (k.cat === 'rare'){
     const v = Math.max(RARE_MIN[k.star], D.rate*F()*RARE_SEC[k.star])*D.rareMult; earn(v); S.stats.rares++;
     const kind = best.kind, first = register(kind);
@@ -2049,7 +2066,7 @@ function ship(p, demo){
     const v = D.linePrice*F(); earn(v); S.stats.shipped++;
     if (coinsFly.length < 28) coinsFly.push({x0:x, y0:y + 4, t:0, d:.55 + Math.random()*.2, dir:Math.random() < .5 ? -1 : 1, ph:Math.random()*4});
     lampT = .2; lampGood = true;
-    if (k.cat === 'good'){ if (register(p.kind)) toast(`図鑑にのった！ ${k.name}`, 'new'); }
+    if (k.cat === 'good'){ if (register(p.kind)) zukanNew(p.kind); }
     else { toast(`${k.name}が出荷されちゃった…`); addText(x, y - 14, 'のがした…', '#dfe7e1'); }
   }
 }
@@ -2093,7 +2110,7 @@ function beltTick(dt){
     if (!demo){
       const v = D.flickBase*F(); earn(v); S.stats.auto++;
       addText(best.x, best.y - best.h/2, s.speak + ' +' + fmtR(v), '#dff6ff');
-      if (register(best.kind)) toast(`図鑑にのった！ ${KINDS[best.kind].name}`, 'new');
+      if (register(best.kind)) zukanNew(best.kind);
       if (s.b === 'air') SFX.air(); else SFX.pop2();
     }
   }
@@ -2275,7 +2292,7 @@ const upgGrid = $('upgGrid'), upgDetail = $('upgDetail'), bldList = $('bldList')
 let toastTimer = 0;
 function toast(msg, kind){
   const el = $('toast'); el.textContent = msg; el.className = 'toast pix' + (kind === 'gold' ? ' gold' : kind === 'new' ? ' leaf' : '') + (openDr ? ' dr' : '') + ' show';
-  if (!openDr){ let y = 0; for (const id of ['quest', 'fever']){ const e = $(id); if (!e.hidden){ const r = e.getBoundingClientRect(); y = Math.max(y, r.bottom); } } if (y) el.style.top = (y + 10) + 'px'; }
+  if (!openDr){ let y = 0; for (const id of ['questTab', 'quest', 'fever']){ const e = $(id); if (!e.hidden){ const r = e.getBoundingClientRect(); y = Math.max(y, r.bottom); } } if (y) el.style.top = (y + 10) + 'px'; }
   clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
 }
 function restart(el, cls){ el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
@@ -2287,6 +2304,7 @@ function hudTick(dt){
   rateT += dt;
   if (achQ.length && !achPopT && !paused()) showAchPop();
   if (rateT > .25){ rateT = 0; const r = '毎秒 +' + fmtR(D.rate*F()) + '円'; rateEl.textContent = r; shopRateEl.textContent = r; if (feverT > 0) $('feverT').textContent = Math.ceil(feverT); }
+  if (questT > 0 && !paused()){ questT -= dt; if (questT <= 0) questHide(); }
   affT += dt; if (affT > .2){ affT = 0; updateAfford();
     if (!(S.tut & 4) && S.bld.part > 0){ S.tut |= 4; save(); }
     const tip = !(S.tut & 4) && !paused() && S.coins >= BLD[0].cost;
@@ -2295,13 +2313,19 @@ function hudTick(dt){
 }
 function checkGoal(){
   const g = GOALS[S.goal];
-  if (!g){ $('qText').textContent = 'ぜんぶ達成！のんびり工場をそだてよう'; $('qRew').textContent = ''; $('qProg').textContent = ''; $('qFill').style.width = '100%'; return; }
+  if (!g){ $('qText').textContent = 'ぜんぶ達成！のんびり工場をそだてよう'; $('qRew').textContent = ''; $('qProg').textContent = ''; $('qFill').style.width = $('qTabFill').style.width = '100%'; return; }
   const v = Math.min(g.n, g.v());
   $('qText').textContent = g.t; $('qRew').textContent = '+' + fmt(g.r) + '円';
-  $('qProg').textContent = `${fmt(v)}/${fmt(g.n)}`; $('qFill').style.width = (v/g.n*100) + '%';
-  if (v >= g.n){ earn(g.r); S.goal++; toast(`めあて達成！ +${fmt(g.r)}円`, 'gold'); SFX.goal(); restart($('quest'), 'done'); save(); checkGoal(); }
+  $('qProg').textContent = `${fmt(v)}/${fmt(g.n)}`; $('qFill').style.width = $('qTabFill').style.width = (v/g.n*100) + '%';
+  if (v >= g.n){ earn(g.r); S.goal++; toast(`めあて達成！ +${fmt(g.r)}円`, 'gold'); SFX.goal(); restart($('quest'), 'done'); questShow(4); save(); checkGoal(); }
 }
-function renderDock(){ $('zukanCount').textContent = `${foundCount()}/${ORDER.length}`; }
+let questT = 0;
+function questShow(sec){ const q = $('quest'); if (q.hidden || q.classList.contains('slout')){ q.hidden = false; q.classList.remove('slout'); restart(q, 'slin'); } $('questTab').hidden = true; $('questTab').setAttribute('aria-expanded', 'true'); questT = Math.max(questT, sec); }
+function questHide(){ const q = $('quest'); if (q.hidden || q.classList.contains('slout')) return; questT = 0; q.classList.remove('slin', 'done'); q.classList.add('slout'); setTimeout(() => { if (!q.classList.contains('slout')) return; q.hidden = true; q.classList.remove('slout'); $('questTab').hidden = false; $('questTab').setAttribute('aria-expanded', 'false'); }, 220); }
+$('questTab').addEventListener('click', () => { ensureAudio(); SFX.sel(); questShow(6); });
+$('quest').addEventListener('click', questHide);
+function renderDock(){ $('zukanNew').hidden = !S.znew.length; }
+function zukanNew(k){ if (!S.znew.includes(k)) S.znew.push(k); renderDock(); restart($('zukanNew'), 'hop'); }
 
 /* 実績 */
 const achQ = []; let achPopT = 0;
@@ -2561,16 +2585,17 @@ function renderZukan(){
   $('zkCount').textContent = `${fc}/${ORDER.length}`; $('zkBonus').textContent = Math.round(fc*D.zkp*100); $('zkFill').style.width = (fc/ORDER.length*100) + '%';
   document.querySelectorAll('#zkTabs button').forEach(b => {
     const ks = ORDER.filter(k => KINDS[k].cat === b.dataset.c), n = ks.filter(k => S.found[k] > 0).length;
-    b.innerHTML = `<span>${CAT_NAME[b.dataset.c]}</span> <span>${n}/${ks.length}</span>`; b.setAttribute('aria-pressed', String(b.dataset.c === zkTab));
+    b.innerHTML = `<span>${CAT_NAME[b.dataset.c]}</span> <span>${n}/${ks.length}</span>${b.dataset.c !== zkTab && ks.some(k => S.znew.includes(k)) ? '<span class="tdot"></span>' : ''}`; b.setAttribute('aria-pressed', String(b.dataset.c === zkTab));
   });
   const lv = farmLv();
   $('zkGrid').innerHTML = ORDER.filter(k => KINDS[k].cat === zkTab).sort((a, b) => KINDS[a].farm - KINDS[b].farm || (KINDS[a].star || 0) - (KINDS[b].star || 0)).map(k => {
     const kk = KINDS[k], f = S.found[k] > 0;
     const sub = f ? `みつけた ${S.found[k]}` : kk.farm > lv ? `${FARMS[kk.farm]}で` : 'みつけてない';
-    return `<button type="button" class="zcell pix fine${f ? '' : ' unk'}" data-k="${k}" data-r="${kk.star || 0}"${f ? '' : ' aria-disabled="true"'}>
+    return `<button type="button" class="zcell pix fine${f ? '' : ' unk'}" data-k="${k}" data-r="${kk.star || 0}"${f ? '' : ' aria-disabled="true"'}>${S.znew.includes(k) ? '<span class="znw">NEW</span>' : ''}
       <span class="zimg">${(sc => f ? img('p:' + k + sc, () => ART.potatoPB(k), sc) : img('s:' + k + sc, () => ART.silPB(k), sc))(Math.max(...ART.size(k)) > 19 ? 3 : 4)}</span>
       <span class="zn">${f ? kk.name : '？？？'}</span><span class="zs">${kk.star ? '★'.repeat(kk.star) : ''}</span><span class="zc">${sub}</span></button>`;
   }).join('');
+  if (S.znew.length){ S.znew = S.znew.filter(k => KINDS[k].cat !== zkTab); renderDock(); }
 }
 $('zkTabs').addEventListener('click', e => { const b = e.target.closest('button[data-c]'); if (!b) return; zkTab = b.dataset.c; SFX.sel(); renderZukan(); });
 $('zkGrid').addEventListener('click', e => { const c = e.target.closest('.zcell'); if (c && S.found[c.dataset.k] > 0){ ensureAudio(); openCard(c.dataset.k, false); } });
@@ -2583,7 +2608,7 @@ function openDrawer(name){
   $('toast').classList.remove('show'); $('achPop').classList.remove('show');
   const [dr, btn] = DR[name];
   openDr = name;
-  if (name === 'shop') setShopTab(shopTab); else renderZukan();
+  if (name === 'shop') setShopTab(shopTab); else { if (S.znew.length && !S.znew.some(k => KINDS[k].cat === zkTab)) zkTab = KINDS[S.znew[0]].cat; renderZukan(); }
   dr.inert = false; dr.setAttribute('aria-hidden', 'false'); dr.classList.add('open');
   $('scrim').classList.add('on'); btn.setAttribute('aria-expanded', 'true'); SFX.open();
   setTimeout(() => { dr.focus({preventScroll:true}); }, 60);
@@ -2685,7 +2710,7 @@ window.addEventListener('pagehide', () => { if (!titleOn) save(); });
 function renderTitlePots(){ $('tpots').innerHTML = ['futsu', 'heart', 'me'].map((k, i) => `<span class="tp" style="animation-delay:${i*.18}s">${img('p:' + k, () => ART.potatoPB(k), A*1.34)}</span>`).join(''); }
 function startGame(){
   if (!titleOn) return;
-  ensureAudio(); titleOn = false; $('title').hidden = true;
+  ensureAudio(); titleOn = false; $('title').hidden = true; questShow(4);
   pots = []; spawnT = .4;
   if (awayPend) showAway(); else if (S.stats.play > 30) toast('おかえり！工場は今日も動いてるよ', 'new');
   checkAch();
