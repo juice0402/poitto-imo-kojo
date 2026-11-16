@@ -85,6 +85,9 @@ button.pix:active:not([aria-disabled="true"]){transform:translateY(var(--u));--d
 .qbar{grid-row:2;grid-column:1/-1;margin:0 var(--ux)}
 .quest.done{animation:qdone2 .6s steps(4)}
 @keyframes qdone2{0%,50%{background:rgba(255,205,60,.5)}}
+.tip{position:fixed;z-index:6;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 14px + var(--px)*26 + 40px);padding:6px 12px;max-width:calc(100% - 32px);line-height:1.4;pointer-events:none;animation:tipb 1s steps(1) infinite}
+.tip::after{content:"";position:absolute;top:calc(100% + var(--px));right:calc(var(--px)*12);border:calc(var(--px)*3) solid transparent;border-top-color:var(--ol);border-bottom:0}
+@keyframes tipb{50%{transform:translateY(calc(var(--px)*-1))}}
 .toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 178px);z-index:40;transform:translate(-50%,calc(var(--px)*-3));opacity:0;padding:6px 14px;max-width:calc(100% - 32px);width:max-content;text-align:center;line-height:1.4;text-wrap:balance;pointer-events:none;transition:opacity .2s steps(3),transform .2s steps(3)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .toast.dr{top:auto!important;bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
@@ -309,6 +312,8 @@ button.pix:active:not([aria-disabled="true"]){transform:translateY(var(--u));--d
   <button class="dbtn pix" id="shopBtn" type="button" aria-expanded="false" aria-controls="shopDrawer"><span class="badge pix fine flat" id="shopBadge" hidden>0</span><img class="pi" data-icon="factory" alt=""><span class="dl">工場</span></button>
 </nav>
 
+<div class="tip pix gold" id="shopTip" hidden>工場でパートさんをやとおう</div>
+
 <div class="scrim" id="scrim"></div>
 
 <aside class="drawer right pix" tabindex="-1" id="shopDrawer" aria-label="工場" aria-hidden="true" inert>
@@ -416,7 +421,7 @@ button.pix:active:not([aria-disabled="true"]){transform:translateY(var(--u));--d
   <div class="logo"><span class="l1">ぽいっと！</span><span class="l2">いも工場</span></div>
   <div class="tpots" id="tpots"></div>
   <p class="tap">タップしてはじめる</p>
-  <p class="tver">ver 1.1</p>
+  <p class="tver">ver 1.2</p>
 </div>
 
 <script>
@@ -1178,6 +1183,14 @@ function worker(f){
   p.set(6, 8, PINK); p.set(12, 8, PINK);
   return p.outline(INK);
 }
+function finger(){
+  const p = new PB(11, 13), SK = '#ffe0c2', SH = '#f0b98c';
+  p.rect(1, 1, 9, 2, '#5fae5a'); p.rect(1, 1, 9, 1, '#86cc7c');
+  p.rect(2, 3, 7, 4, SK); p.rect(2, 7, 2, 1, SK); p.rect(7, 7, 2, 1, SK);
+  p.rect(4, 7, 3, 5, SK); p.rect(4, 11, 3, 1, '#ffd3a8');
+  p.rect(8, 3, 1, 4, SH); p.rect(6, 7, 1, 5, SH);
+  return p.outline(INK);
+}
 function airBox(){
   const p = new PB(15, 17);
   p.rect(5, 2, 8, 12, '#97a1ad'); p.rect(5, 2, 8, 1, '#c9d0d8'); p.rect(12, 3, 1, 11, '#6c7581'); p.rect(5, 13, 8, 1, '#6c7581');
@@ -1233,6 +1246,7 @@ return {
   iconSilPB: n => icon(n).map((c, m) => m === 'ol' ? '#5a4632' : '#8a7660'),
   icons: Object.keys(IC),
   worker: f => C('w:' + f, () => worker(f)),
+  finger: () => C('finger', finger),
   workerPB: worker,
   airBox: () => C('air', airBox),
   roboBase: () => C('robo', roboBase),
@@ -1668,7 +1682,7 @@ const achCount = () => ACH.filter(a => S.ach[a.id]).length;
 /* ---------- 状態 ---------- */
 const DEF = () => ({coins:0, bld:Object.fromEntries(BLD.map(b => [b.id, 0])), upg:{}, found:{}, ach:{}, achNew:0, goal:0, buy:1, lastSeen:0,
   perk:{}, seeds:0, seedsUsed:0, prestiges:0, kiseki:0, presNotified:false, bgm:true,
-  stats:{shipped:0, flicked:0, auto:0, rares:0, complaints:0, misses:0, upgs:0, blds:0, fevers:0, superFevers:0, earned:0, earnedRun:0, play:0, away:0, awayEarned:0, goldFevers:0, diaFevers:0}, sound:true, seenHelp:false});
+  stats:{shipped:0, flicked:0, auto:0, rares:0, complaints:0, misses:0, upgs:0, blds:0, fevers:0, superFevers:0, earned:0, earnedRun:0, play:0, away:0, awayEarned:0, goldFevers:0, diaFevers:0}, sound:true, seenHelp:false, tut:0});
 let S = DEF();
 function merge(o){
   const d = DEF(); if (!o || typeof o !== 'object') return d;
@@ -1681,6 +1695,7 @@ function merge(o){
   for (const k in d.stats) d.stats[k] = (o.stats && +o.stats[k]) || 0;
   if (!o.stats || o.stats.earnedRun == null) d.stats.earnedRun = d.stats.earned;
   d.goal = o.goal | 0; d.buy = [1, 10, 100].includes(o.buy) ? o.buy : 1; d.sound = o.sound !== false; d.seenHelp = !!o.seenHelp;
+  d.tut = o.tut == null ? ((o.stats && (+o.stats.shipped || +o.stats.flicked)) ? 7 : 0) : (o.tut | 0);
   return d;
 }
 function load(){
@@ -1961,8 +1976,12 @@ function pickKind(){
   return pickW(GOOD_W);
 }
 function newPot(kind, x, y){ const [w, h] = ART.size(kind); return {kind, x, y, w, h, bo:Math.random()*5, bp:2.4 + Math.random()*2.8}; }
+let tutPot = null, tutSpawnN = 0;
 function spawn(){
-  const kind = pickKind(), p = newPot(kind, 0, 0);
+  let kind = pickKind();
+  if (!titleOn && !(S.tut & 1) && !tutPot && ++tutSpawnN >= 3) kind = 'me';
+  const p = newPot(kind, 0, 0), cat = KINDS[kind].cat;
+  if (!titleOn && !tutPot && ((cat === 'bad' && !(S.tut & 1)) || (cat === 'rare' && !(S.tut & 2)))){ p.tut = cat; tutPot = p; }
   p.y = -p.h/2 - 1;
   const lo = G.ix0 + p.w/2 + 2, hi = G.ix1 - p.w/2 - 2;
   let best = (lo + hi)/2, bestGap = -1;
@@ -1993,6 +2012,7 @@ function tapAt(ax, ay){
   for (const p of pots){ const r = Math.max(p.w, p.h)/2 + 4, d = Math.hypot(p.x - ax, p.y - ay); if (d < r && d < bd){ bd = d; best = p; } }
   if (!best) return;
   pots.splice(pots.indexOf(best), 1);
+  if (best === tutPot){ S.tut |= best.tut === 'bad' ? 1 : 2; tutPot = null; save(); }
   const k = KINDS[best.kind], side = best.x < (G.ix0 + G.ix1)/2 ? -1 : 1;
   if (k.cat === 'bad'){
     const v = (D.flickBase + D.flickPct*D.rate)*F(); earn(v); S.stats.flicked++;
@@ -2049,6 +2069,8 @@ function startFever(star){
 }
 function beltTick(dt){
   const demo = titleOn;
+  if (tutPot && !pots.includes(tutPot)) tutPot = null;
+  if (tutPot && tutPot.y >= tutStopY()) return;
   beltOff += G.speed*dt;
   spawnT -= dt;
   if (spawnT <= 0){ spawn(); spawnT += D.interval*(feverT > 0 ? .65 : 1)*(.7 + Math.random()*.6); if (spawnT < .05) spawnT = .05; }
@@ -2064,7 +2086,7 @@ function beltTick(dt){
     st.t = Math.min(st.t + dt, 60);
     if (st.t < stCd(s.b)) continue;
     const y0 = G.st[s.b]; let best = null, bd = 1e9;
-    for (const p of pots){ if (p.dead || KINDS[p.kind].cat !== 'bad') continue; const d = Math.abs(p.y - y0); if (d < s.reach && d < bd){ bd = d; best = p; } }
+    for (const p of pots){ if (p.dead || p.tut || KINDS[p.kind].cat !== 'bad') continue; const d = Math.abs(p.y - y0); if (d < s.reach && d < bd){ bd = d; best = p; } }
     if (!best) continue;
     st.t = 0; st.anim = s.b === 'robo' ? .36 : .3; st.tx = best.x; st.ty = best.y; best.dead = true;
     flyOff(best, s.side); puff(best.x, best.y, '#ffffff', 4);
@@ -2077,6 +2099,7 @@ function beltTick(dt){
   }
   pots = pots.filter(p => !p.dead);
 }
+function tutStopY(){ return Math.round(AH*.46); }
 function fxTick(dt){
   for (const f of flies){ f.t += dt; if (f.t >= f.d){ f.dead = true; if (f.done) f.done(); } }
   flies = flies.filter(f => !f.dead);
@@ -2185,6 +2208,11 @@ function drawScene(){
   drawBelt();
   lc.globalAlpha = .42; for (const p of pots) lc.drawImage(ART.shadow(p.kind), Math.round(p.x - p.w/2) + 1, Math.round(p.y - p.h/2) + 2); lc.globalAlpha = 1;
   for (const p of pots) drawPot(p);
+  if (tutPot && tutPot.y > 0){
+    const q = tutPot, f = ART.finger(), bob = ((T*3) | 0) % 2;
+    if (q.y >= tutStopY()){ lc.fillStyle = q.tut === 'rare' ? '#ffe066' : '#ffffff'; ring(Math.round(q.x), Math.round(q.y), Math.round(Math.max(q.w, q.h)/2) + 3 + bob); }
+    lc.drawImage(f, Math.round(q.x - f.width/2), Math.round(q.y - q.h/2 - f.height - 1 - bob*2));
+  }
   drawStations();
   for (const f of flies) drawFly(f);
   lc.fillStyle = 'rgba(255,255,255,.7)'; for (const r of ripples) ring(r.x, r.y, 2 + Math.round(r.t*40));
@@ -2216,6 +2244,12 @@ function drawOverlay(){
     if (S.bld.air) lab.push([G.x1 + 4, G.st.air - 14, S.bld.air]);
     if (S.bld.robo) lab.push([G.x0 - 5, G.st.robo + 7, S.bld.robo]);
     for (const [x0, y, n] of lab){ if (n < 2) continue; const s = '×' + n, hw = (8 + 4*(s.length - 1))/A + 2, x = clamp(x0, hw, AW - hw); ctx.lineWidth = 4; ctx.strokeStyle = '#1a120c'; ctx.strokeText(s, Math.round(x*A), Math.round(y*A)); ctx.fillStyle = '#fff3d0'; ctx.fillText(s, Math.round(x*A), Math.round(y*A)); }
+  }
+  if (tutPot && tutPot.y > 0 && !titleOn){
+    const q = tutPot, s = q.tut === 'bad' ? 'タップでポイッ！' : 'キラキラはタップでゲット！', hw = s.length*8/A + 2;
+    const x = clamp(q.x, hw, AW - hw), y = q.y - q.h/2 - 22;
+    ctx.font = `16px ${FONT}`; ctx.lineWidth = 5; ctx.strokeStyle = '#1a120c'; ctx.strokeText(s, Math.round(x*A), Math.round(y*A));
+    ctx.fillStyle = q.tut === 'rare' ? '#ffe27a' : '#ffffff'; ctx.fillText(s, Math.round(x*A), Math.round(y*A));
   }
   for (const t of texts){
     const k = t.life/t.max, x = Math.round(t.x*A), y = Math.round((t.y - k*14)*A);
@@ -2253,7 +2287,11 @@ function hudTick(dt){
   rateT += dt;
   if (achQ.length && !achPopT && !paused()) showAchPop();
   if (rateT > .25){ rateT = 0; const r = '毎秒 +' + fmtR(D.rate*F()) + '円'; rateEl.textContent = r; shopRateEl.textContent = r; if (feverT > 0) $('feverT').textContent = Math.ceil(feverT); }
-  affT += dt; if (affT > .2){ affT = 0; updateAfford(); }
+  affT += dt; if (affT > .2){ affT = 0; updateAfford();
+    if (!(S.tut & 4) && S.bld.part > 0){ S.tut |= 4; save(); }
+    const tip = !(S.tut & 4) && !paused() && S.coins >= BLD[0].cost;
+    if ($('shopTip').hidden === tip) $('shopTip').hidden = !tip;
+  }
 }
 function checkGoal(){
   const g = GOALS[S.goal];
@@ -2618,7 +2656,7 @@ $('resetRow').addEventListener('click', e => {
   if (e.target.closest('#resetNo')){ openMenu(); return; }
   if (e.target.closest('#resetYes')){
     const snd = S.sound, bgm = S.bgm; S = DEF(); S.sound = snd; S.bgm = bgm; S.seenHelp = true; feverM = 5; BGM.fever(false);
-    pots = []; flies = []; parts = []; coinsFly = []; texts = []; feverT = 0; $('fever').hidden = true; disp = 0; selUpg = null; lastBadge = -1;
+    pots = []; flies = []; parts = []; coinsFly = []; texts = []; feverT = 0; tutPot = null; tutSpawnN = 0; $('fever').hidden = true; disp = 0; selUpg = null; lastBadge = -1;
     awayPend = null; achQ.length = 0; feverLv = 0; upgOpen = false; for (const k in ST) ST[k].t = 0; recalc(); save(); renderDock(); renderAchBadge(); checkGoal(); $('menuModal').hidden = true; toast('さいしょからにしたよ');
   }
 });
@@ -2649,7 +2687,7 @@ function startGame(){
   if (!titleOn) return;
   ensureAudio(); titleOn = false; $('title').hidden = true;
   pots = []; spawnT = .4;
-  if (!S.seenHelp) openHelp(); else if (awayPend) showAway(); else if (S.stats.play > 30) toast('おかえり！工場は今日も動いてるよ', 'new');
+  if (awayPend) showAway(); else if (S.stats.play > 30) toast('おかえり！工場は今日も動いてるよ', 'new');
   checkAch();
   SFX.sel(); cachePos();
 }
