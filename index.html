@@ -292,6 +292,19 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
 .pres .pmul{font-size:16px;color:var(--ink-2)}
 .pres .pmul em{font-style:normal;color:var(--leaf-d)}
 .perknote{margin:-2px 0 0;font-size:14px;color:var(--ink-2)}
+/* ver 2.4：枠の大きさをそろえる。1行の名前は .fit（はみ出したら 16→14→12px、それでもだめなら…）。説明は .clamp2（14px・2行ぶんの高さで固定） */
+.fit{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:100%}
+.bname.fit em,.bname.fit small{margin-left:6px}
+.arow .fit{text-wrap:nowrap}
+#bldList .bmain{height:2.7em;justify-content:center}
+.bmain .bnum,.bmain .btag{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clamp2{font-size:14px;line-height:1.35;height:38px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-wrap:pretty}
+/* 引き出しはダンボールの色。中のボタン（白っぽい）と見分けやすく */
+.drawer{--bg:#dcc093;--h2:#ead6b0;--l2:#b8955e}
+.drawer .sec h3,.drawer .dh h2 b,.drawer .stats,.drawer .perknote,.drawer .empty{color:var(--ink)}
+.drawer .sec h3::after{background:#c3a06b}
+.drawer .sec h3 small{color:#7a3e00}
+.drawer .zinfo b{color:#1f5a1c}
 .pres{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;text-align:center;--bg:#fffaf0}
 .pres b{font-weight:400;font-size:24px;line-height:1.3;color:var(--leaf-d)}
 .pres p{margin:0;line-height:1.6;color:var(--ink-2);text-wrap:pretty}
@@ -464,7 +477,7 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
   <div class="logo"><span class="l1">ぽいっと！</span><span class="l2">いも工場</span></div>
   <div class="tpots" id="tpots"></div>
   <p class="tap">タップしてはじめる</p>
-  <p class="tver">ver 2.3</p>
+  <p class="tver">ver 2.4</p>
 </div>
 
 <script>
@@ -1593,7 +1606,7 @@ const PERKS = [
   {id:'tanemaki',name:'はじめの手みやげ', icon:'part',   cost:3,   desc:'転生のあと、パートさんが10人いる'},
   {id:'shikin',  name:'開業資金',         icon:'coin',   cost:5,   desc:'転生のあと、1万円から始まる'},
   {id:'gunte',   name:'ポイッの記憶',     icon:'glove',  cost:6,   desc:'軍手2つと箱づめ2つを持って始まる'},
-  {id:'kioku1',  name:'契約の記憶',       icon:'map',    cost:8,   desc:'やまの畑・ふしぎな畑の契約を持って始まる'},
+  {id:'kioku1',  name:'契約の記憶',       icon:'map',    cost:8,   desc:'やま・ふしぎな畑の契約を持って始まる'},
   {id:'jouro',   name:'金のじょうろ',     icon:'clover', cost:10,  desc:'レア芋が1.25倍出やすい'},
   {id:'rusuban', name:'留守番ロボ',       icon:'robo',   cost:10,  desc:'留守ボーナスが毎秒の2.5割・最大12時間に'},
   {id:'matsuri', name:'長いお祭り',       icon:'star',   cost:12,  desc:'フィーバーが10秒のびる'},
@@ -1606,7 +1619,7 @@ const PERKS = [
   {id:'kago3',   name:'いもの神加護',     icon:'shrine', cost:200, desc:'生産が2倍'},
   {id:'manako',  name:'黄金のまなざし',   icon:'lens',   cost:300,   desc:'レア芋がさらに1.5倍出やすい'},
   {id:'ougon',   name:'黄金の地図',       icon:'map',    cost:1e3,   desc:'黄金の畑と契約できるようになる'},
-  {id:'kioku3',  name:'契約の記憶・上',   icon:'map',    cost:3000,  desc:'うみべの畑・星ふる畑の契約も持って始まる'},
+  {id:'kioku3',  name:'契約の記憶・上',   icon:'map',    cost:3000,  desc:'うみべ・星ふる畑の契約も持って始まる'},
   {id:'houseki', name:'宝石の地図',       icon:'map',    cost:1e4,  desc:'宝石の畑と契約できるようになる'},
   {id:'toki',    name:'時のたね',         icon:'time',   cost:1e4,  desc:'留守ボーナスが毎秒の5割・最大24時間に'},
   {id:'okashi',  name:'おかしの地図',     icon:'map',    cost:1e5, desc:'おかしの畑と契約できるようになる'},
@@ -1704,7 +1717,7 @@ const ACH = [
     .forEach(([e, name]) => add('ru' + e, name, `毎秒 ${fmt(Math.pow(10, e))}円 をこえる`, () => Math.floor(D.rate), Math.pow(10, e)));
   for (const b of BLD) for (const n of [1, 50, 100, 150, 200, 300]){ if (b.id === 'part' && n === 50) continue;
     add(`b_${b.id}_${n}`, n === 1 ? `はじめての${b.name}` : `${b.name} ${n}${b.unit}`, `${b.name}を${n}${b.unit}にする`, () => S.bld[b.id], n); }
-  FARMS.forEach((fm, f) => { const ks = ORDER.filter(k => KINDS[k].farm === f); if (ks.length) add('zf' + f, `${fm}コンプリート`, `${fm}の芋を図鑑にぜんぶのせる`, () => ks.filter(k => S.found[k] > 0).length, ks.length); });
+  FARMS.forEach((fm, f) => { const ks = ORDER.filter(k => KINDS[k].farm === f); if (ks.length) add('zf' + f, `${fm}コンプリート`, `${fm}の図鑑をうめる`, () => ks.filter(k => S.found[k] > 0).length, ks.length); });
   [[50,'いも博士'],[75,'いも大博士'],[100,'いも名誉博士'],[ORDER.length,'いも図鑑の神さま']].forEach(([n, name]) => add('zt' + n, name, `図鑑を${n}しゅるいうめる`, () => foundCount(), n));
   [[1000,'レア芋コレクター'],[5000,'レア芋マスター'],[20000,'レア芋の神さま']].forEach(([n, name]) => add('rc' + n, name, `レア芋を${fmt(n)}こつかまえる`, () => S.stats.rares, n));
   add('gfev', '黄金の時間', '黄金フィーバーを1回', () => S.stats.goldFevers, 1);
@@ -2339,6 +2352,14 @@ function toast(msg, kind){
   clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), dur);
 }
 function restart(el, cls){ el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+/* 1行の名前：はみ出したら 16→14→12px（それでもだめなら …）。枠の高さは変えない */
+function fitText(root){ if (!root) return;
+  root.querySelectorAll('.fit').forEach(e => { e.style.fontSize = e.style.lineHeight = ''; if (!e.clientWidth || e.scrollWidth <= e.clientWidth + 1) return; e.style.lineHeight = getComputedStyle(e).lineHeight; for (const fs of [14, 12]){ e.style.fontSize = fs + 'px'; if (e.scrollWidth <= e.clientWidth + 1) break; } });
+  /* 説明（2行ぶんの高さ）：はみ出したら 14→12px */
+  root.querySelectorAll('.clamp2').forEach(e => { e.style.fontSize = ''; if (e.clientHeight && e.scrollHeight > e.clientHeight + 1) e.style.fontSize = '12px'; });
+}
+const fitAll = () => ['bldList', 'perkList', 'upgDetail', 'zkGrid', 'achList'].forEach(id => fitText($(id)));
+window.addEventListener('resize', fitAll); if (document.fonts) document.fonts.ready.then(fitAll);
 
 let disp = 0, shownC = -1, rateT = 0, affT = 0;
 function hudTick(dt){
@@ -2439,12 +2460,13 @@ function renderAch(){
   const list = ACH.filter(a => achTab === 'all' || (achTab === 'got') === !!S.ach[a.id]);
   $('achList').innerHTML = (list.length ? '' : `<p class="empty">${achTab === 'got' ? 'まだ実績はないよ' : 'ぜんぶとった！すごい！'}</p>`) + list.map(a => {
     const g = !!S.ach[a.id], f = a.f || fmt, v = Math.min(a.n, a.v());
-    return `<div class="arow pix fine flat${g ? ' got' : ''}">${g ? ti : ts}<div><b>${g ? a.name : '？？？'}</b><span>${a.d}</span><span class="ap">${g ? `生産 +${Math.round(D.achp*100)}%` : `${f(v)} / ${f(a.n)}`}</span></div></div>`;
+    return `<div class="arow pix fine flat${g ? ' got' : ''}">${g ? ti : ts}<div><b class="fit">${g ? a.name : '？？？'}</b><span class="fit">${a.d}</span><span class="ap">${g ? `生産 +${Math.round(D.achp*100)}%` : `${f(v)} / ${f(a.n)}`}</span></div></div>`;
   }).join('');
+  fitText($('achList'));
 }
 function openAch(){
   renderAch(); S.achNew = 0; renderAchBadge(); save();
-  $('achModal').hidden = false; $('achModal').querySelector('.mpanel').focus({preventScroll:true}); SFX.open();
+  $('achModal').hidden = false; fitText($('achList')); $('achModal').querySelector('.mpanel').focus({preventScroll:true}); SFX.open();
 }
 $('achBtn').addEventListener('click', () => { ensureAudio(); openAch(); });
 $('achTabs').addEventListener('click', e => { const b = e.target.closest('button[data-a]'); if (!b) return; achTab = b.dataset.a; SFX.sel(); renderAch(); $('achList').scrollTop = 0; });
@@ -2486,20 +2508,21 @@ function bldRow(b){
   const n = S.buy, cost = bldCost(b, n);
   return `<button type="button" class="brow pix fine" id="b-${b.id}" data-b="${b.id}">
     ${img('i:' + b.id, icoPB(b.id), A, 'bico')}
-    <span class="bmain"><span class="bname">${b.name}</span>${!S.bld[b.id] && b.tag ? `<em class="btag">${b.tag}</em>` : `<span class="bnum">${fmt(S.bld[b.id])}${b.unit}</span>`}</span>
+    <span class="bmain"><span class="bname fit">${b.name}</span>${!S.bld[b.id] && b.tag ? `<em class="btag">${b.tag}</em>` : `<span class="bnum">${fmt(S.bld[b.id])}${b.unit}</span>`}</span>
     <span class="bcost">${coinImg()}<span>${fmt(cost)}円</span></span></button>`;
 }
 function mysRow(b){
   return `<div class="brow pix fine mys" aria-disabled="true">${img('is:' + b.id, () => ART.iconSilPB(b.id), A, 'bico')}
-    <span class="bmain"><span class="bname">？？？</span></span><span class="bcost">${coinImg()}<span>${fmt(b.cost)}円</span></span></div>`;
+    <span class="bmain"><span class="bname fit">？？？</span></span><span class="bcost">${coinImg()}<span>${fmt(b.cost)}円</span></span></div>`;
 }
 function renderUpgDetail(){
   const u = selUpg && UI[selUpg];
   if (!u){ upgDetail.hidden = true; return; }
   upgDetail.hidden = false;
   upgDetail.innerHTML = `<span class="ud-ico">${img('i:' + u.icon, icoPB(u.icon), A)}</span>
-    <span class="ud-main"><b>${u.name}</b><span>${u.desc}</span></span>
+    <span class="ud-main"><b class="fit">${u.name}</b><span class="clamp2">${u.desc}</span></span>
     <button type="button" class="pix gold ud-buy" id="udBuy" data-u="${u.id}">${coinImg()}<span>${fmt(u.cost)}円</span></button>`;
+  fitText(upgDetail);
 }
 function renderShop(){
   const list = availUpgs();
@@ -2519,7 +2542,7 @@ function renderShop(){
   $('stats').innerHTML = [['出荷', fmt(st.shipped) + 'こ'], ['ポイッ', fmt(st.flicked) + 'こ'], ['自動ではじいた', fmt(st.auto) + 'こ'], ['レア芋', fmt(st.rares) + 'こ'], ['クレーム', fmt(st.complaints) + '回'], ['かせいだ合計', fmt(st.earned) + '円']]
     .map(([a, b]) => `<span>${a}</span><b>${b}</b>`).join('');
   shopSig = list.map(u => u.id).join(',') + '|' + vis.length + '|' + vis.filter(v => v.mys).map(v => v.b.id).join('');
-  updateAfford(true);
+  fitText(bldList); updateAfford(true);
 }
 function updateAfford(){
   let n = 0;
@@ -2595,8 +2618,8 @@ function renderSeed(){
   /* 種の改良は「いま買えるもの＋その次の2つ（最低3つ）」だけ見せる。持っているものは下にたたむ（ver 1.8） */
   const kc = kisekiCost();
   const pRow = pk => { const got = !!S.perk[pk.id];
-    return `<button type="button" class="brow pix fine${got ? ' got' : av < pk.cost ? ' ng' : ''}" data-p="${pk.id}"${got ? ' aria-disabled="true"' : ''}>${img('i:' + pk.icon, icoPB(pk.icon), A, 'bico')}<span class="bmain"><span class="bname">${pk.name}</span><span class="binfo">${pk.desc}</span></span><span class="bcost">${got ? '済' : `${seedImg()}<span>${fmt(pk.cost)}</span>`}</span></button>`; };
-  const kRow = () => `<button type="button" class="brow pix fine${av < kc ? ' ng' : ''}" data-k="1">${img('i:imo', icoPB('imo'), A, 'bico')}<span class="bmain"><span class="bname">いもの奇跡<em>Lv.${S.kiseki}</em></span><span class="binfo">生産がさらに10倍（何回でも買える。いまは ×${fmt(Math.pow(10, S.kiseki))}）</span></span><span class="bcost">${seedImg()}<span>${fmt(kc)}</span></span></button>`;
+    return `<button type="button" class="brow pix fine${got ? ' got' : av < pk.cost ? ' ng' : ''}" data-p="${pk.id}"${got ? ' aria-disabled="true"' : ''}>${img('i:' + pk.icon, icoPB(pk.icon), A, 'bico')}<span class="bmain"><span class="bname fit">${pk.name}</span><span class="binfo clamp2">${pk.desc}</span></span><span class="bcost">${got ? '済' : `${seedImg()}<span>${fmt(pk.cost)}</span>`}</span></button>`; };
+  const kRow = () => `<button type="button" class="brow pix fine${av < kc ? ' ng' : ''}" data-k="1">${img('i:imo', icoPB('imo'), A, 'bico')}<span class="bmain"><span class="bname fit">いもの奇跡<em>Lv.${S.kiseki}</em></span><span class="binfo clamp2">生産がさらに10倍。何回でも買える</span></span><span class="bcost">${seedImg()}<span>${fmt(kc)}</span></span></button>`;
   const todo = PERKS.filter(pk => !S.perk[pk.id]).map(pk => ({pk, cost:pk.cost})).concat([{k:1, cost:kc}]).sort((a, b) => a.cost - b.cost);
   const nOk = todo.filter(x => x.cost <= av).length, show = todo.slice(0, Math.max(3, nOk + 2));
   if (S.kiseki > 0 && !show.some(x => x.k)) show.push({k:1});
@@ -2604,6 +2627,7 @@ function renderSeed(){
   $('perkList').innerHTML = show.map(x => x.k ? kRow() : pRow(x.pk)).join('')
     + (got.length ? `<button type="button" class="pix fine flat morebtn" id="perkMore" aria-expanded="${perkOpen}">持っている改良 ${got.length}こ ${perkOpen ? '▲' : '▼'}</button>` + (perkOpen ? got.map(pRow).join('') : '') : '');
   seedSig = `${ok}|${av}|${Object.keys(S.perk).length}|${S.seeds}|${S.kiseki}`;
+  fitText($('perkList'));
 }
 function seedTick(){
   if (openDr !== 'shop' || shopTab !== 's') return;
@@ -2674,8 +2698,9 @@ function renderZukan(){
     const sub = f ? `みつけた ${S.found[k]}` : kk.farm > lv ? `${FARMS[kk.farm]}で` : 'みつけてない';
     return `<button type="button" class="zcell pix fine${f ? '' : ' unk'}" data-k="${k}" data-r="${kk.star || 0}"${f ? '' : ' aria-disabled="true"'}>${S.znew.includes(k) ? '<span class="znw">NEW</span>' : ''}
       <span class="zimg">${(sc => f ? img('p:' + k + sc, () => ART.potatoPB(k), sc) : img('s:' + k + sc, () => ART.silPB(k), sc))(Math.max(...ART.size(k)) > 19 ? 3 : 4)}</span>
-      <span class="zn">${f ? kk.name : '？？？'}</span><span class="zs">${kk.star ? '★'.repeat(kk.star) : ''}</span><span class="zc">${sub}</span></button>`;
+      <span class="zn fit">${f ? kk.name : '？？？'}</span><span class="zs">${kk.star ? '★'.repeat(kk.star) : ''}</span><span class="zc fit">${sub}</span></button>`;
   }).join('');
+  fitText($('zkGrid'));
   if (S.znew.length){ S.znew = S.znew.filter(k => KINDS[k].cat !== zkTab); renderDock(); }
 }
 $('zkTabs').addEventListener('click', e => { const b = e.target.closest('button[data-c]'); if (!b) return; zkTab = b.dataset.c; SFX.sel(); renderZukan(); });

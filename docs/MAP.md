@@ -21,11 +21,16 @@
 - 音：SFX・BGM
 - ベルトの上：warm（はじめのゆっくり）・spawn・tapAt・ship・startFever・beltTick（ベルトの速さ・芋の出る間かく・スタッフ）・econTick
 - 描く：drawBelt・drawPot・drawStations・draw
-- 画面の部品：toast・hudTick（お知らせの順番・calmT）・setQuest・checkGoal（めあて達成・qDoneQ）・showAchPop・showRarePop・checkAch
+- 画面の部品：toast・fitText（1行の名前をちぢめる）・hudTick（お知らせの順番・calmT）・setQuest・checkGoal（めあて達成・qDoneQ）・showAchPop・showRarePop・checkAch
 - 留守ボーナス：calcAway・showAway
 - 工場：renderShop・bldRow・buyBld・buyUpg／転生：renderSeed・doPrestige
 - 図鑑：renderZukan／引き出し：openDrawer・closeDrawers
 - カード・メニュー：openCard・openMenu／タイトル：startGame／はじまり：frame・start
+
+## 枠の決まり（ver 2.4）
+- 同じしゅるいの枠は、中身にかかわらず同じ大きさ。1行の名前は class="fit"（はみ出したら 16→14→12px）、説明は class="clamp2"（14px・高さ38px・2行まで）
+- 描きなおしたら fitText(その入れもの) をよぶ（renderShop・renderSeed・renderUpgDetail・renderZukan・renderAch）
+- 引き出しの背景はダンボール色（.drawer の --bg）。中のボタンは白っぽい色
 
 ## お知らせの決まり
 - 引き出しやカードを開いているあいだに起きた「めあて達成」と「実績」は、画面にもどって0.5秒たってから1つずつ出す
