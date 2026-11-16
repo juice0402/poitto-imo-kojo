@@ -116,6 +116,15 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
 .achpop div{min-width:0}
 .achpop small{display:block;font-size:16px;color:var(--ink-2);line-height:1.2}
 .achpop b{display:block;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+/* レア芋をとったら、図鑑ボタンの上に小さな窓（ver 2.0。前は画面のまん中にカード）。おすとカードが開く */
+.rpop{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 14px + var(--px)*26 + 20px);z-index:9;display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 12px 6px 8px;max-width:calc(100% - 32px);text-align:left;opacity:0;transform:translateY(calc(var(--px)*3));pointer-events:none;transition:opacity .2s steps(3),transform .2s steps(3)}
+.rpop.show{opacity:1;transform:none;pointer-events:auto}
+.rpt{display:flex;flex-direction:column;min-width:0;line-height:1.25}
+.rpt small{font-size:14px;color:var(--gold-tx);letter-spacing:.1em}
+.rpt small:empty{display:none}
+.rpt b{font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rpnew{flex:none;padding:0 5px;line-height:1.4;font-size:14px;color:#fff;--bg:var(--red);--h2:#ff8c74;--l2:#9e2f1c}
+.rpn{flex:none;color:var(--ink-2);font-variant-numeric:tabular-nums}
 
 /* bottom buttons */
 .dock{position:fixed;left:0;right:0;bottom:0;z-index:5;pointer-events:none;display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 14px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
@@ -326,6 +335,7 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
 </header>
 <div class="toast pix" id="toast" role="status" aria-live="polite"></div>
 <div class="achpop pix gold" id="achPop" role="status" aria-live="polite"><img class="pi" data-icon="trophy" alt=""><div><small>実績かいじょ！</small><b id="achPopName"></b></div></div>
+<button class="rpop pix" id="rarePop" type="button" aria-live="polite"><img class="pi" id="rpImg" alt=""><span class="rpt"><small id="rpStar"></small><b id="rpName"></b></span><span class="rpnew pix fine flat" id="rpNew">NEW</span><span class="rpn" id="rpN"></span></button>
 
 <nav class="dock" aria-label="工場と図鑑">
   <button class="dbtn pix" id="zukanBtn" type="button" aria-expanded="false" aria-controls="zukanDrawer"><img class="pi" data-icon="book" alt=""><span class="dl">図鑑</span><span class="znew pix fine flat" id="zukanNew" hidden>NEW</span></button>
@@ -439,7 +449,7 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
   <div class="logo"><span class="l1">ぽいっと！</span><span class="l2">いも工場</span></div>
   <div class="tpots" id="tpots"></div>
   <p class="tap">タップしてはじめる</p>
-  <p class="tver">ver 1.9</p>
+  <p class="tver">ver 2.0</p>
 </div>
 
 <script>
@@ -2049,7 +2059,7 @@ function tapAt(ax, ay){
     addText(best.x, best.y - best.h/2 - 2, '+' + fmt(v) + '円', '#ffe27a', true);
     flyTo(best, POS.zukan[0], POS.zukan[1], .6, () => {
       sparkBurst(POS.zukan[0], POS.zukan[1]); restart($('zukanBtn'), 'got');
-      if (first) openCard(kind, true); else toast(`${k.name} ×${S.found[kind]}`, 'new');
+      if (first) zukanNew(kind); showRarePop(kind, first);
     });
     if (k.star >= 4) startFever(k.star);
   } else {
@@ -2313,7 +2323,8 @@ function hudTick(dt){
   const diff = S.coins - disp; disp = Math.abs(diff) < .5 ? S.coins : disp + diff*Math.min(1, dt*10);
   const c = Math.floor(disp); if (c !== shownC){ shownC = c; const s = fmt(c); coinsEl.textContent = s; shopCoinsEl.textContent = s; const fs = s.length > 9 ? '20px' : s.length > 7 ? '24px' : ''; if (coinsEl.style.fontSize !== fs){ coinsEl.style.fontSize = fs; shopCoinsEl.style.fontSize = fs; } }
   rateT += dt;
-  if (achQ.length && !achPopT && !paused()) showAchPop();
+  if (achQ.length && !achPopT && !rpTimer && !paused()) showAchPop();
+  if (rpTimer && openDr) hideRarePop();
   if (rateT > .25){ rateT = 0; const r = '毎秒 +' + fmtR(D.rate*F()) + '円'; rateEl.textContent = r; shopRateEl.textContent = r; if (feverT > 0) $('feverT').textContent = Math.ceil(feverT); }
   if (questT > 0 && !paused()){ questT -= dt; if (questT <= 0) questHide(); }
   affT += dt; if (affT > .2){ affT = 0; updateAfford();
@@ -2353,13 +2364,28 @@ function renderDock(){ $('zukanNew').hidden = !S.znew.length; }
 function zukanNew(k){ if (!S.znew.includes(k)) S.znew.push(k); renderDock(); restart($('zukanNew'), 'hop'); }
 
 /* 実績 */
-const achQ = []; let achPopT = 0;
+const achQ = []; let achPopT = 0, achCur = null;
 function showAchPop(){
-  if (achPopT || !achQ.length || paused()) return;
-  $('achPopName').textContent = achQ.shift();
+  if (achPopT || rpTimer || !achQ.length || paused()) return;
+  achCur = achQ.shift(); $('achPopName').textContent = achCur;
   const el = $('achPop'); el.classList.add('show');
-  achPopT = setTimeout(() => { el.classList.remove('show'); setTimeout(() => { achPopT = 0; showAchPop(); }, 260); }, 2400);
+  achPopT = setTimeout(() => { el.classList.remove('show'); achCur = null; setTimeout(() => { achPopT = 0; showAchPop(); }, 260); }, 2400);
 }
+/* レア芋の小窓。出ているあいだ、実績のお知らせは待つ（出ていたら引っこめて、あとでもう一度） */
+let rpKind = null, rpFirst = false, rpTimer = 0;
+function showRarePop(kind, first){
+  const k = KINDS[kind], [w, h] = ART.size(kind);
+  setImg($('rpImg'), 'p:' + kind, () => ART.potatoPB(kind), clamp(Math.floor(48/Math.max(w, h)), 2, 3));
+  $('rpStar').textContent = k.star ? '★'.repeat(k.star) : '';
+  $('rpName').textContent = k.name;
+  $('rpNew').hidden = !first; $('rpN').textContent = first ? '' : '×' + fmt(S.found[kind] || 0);
+  rpKind = kind; rpFirst = first;
+  if (achPopT){ clearTimeout(achPopT); achPopT = 0; $('achPop').classList.remove('show'); if (achCur){ achQ.unshift(achCur); achCur = null; } }
+  $('rarePop').classList.add('show');
+  clearTimeout(rpTimer); rpTimer = setTimeout(hideRarePop, first ? 3500 : 2200);
+}
+function hideRarePop(){ clearTimeout(rpTimer); rpTimer = 0; $('rarePop').classList.remove('show'); }
+$('rarePop').addEventListener('click', () => { if (!rpKind) return; ensureAudio(); SFX.sel(); const k = rpKind, f = rpFirst; hideRarePop(); openCard(k, f); });
 function renderAchBadge(){ const b = $('achBadge'); b.textContent = S.achNew > 99 ? '99+' : S.achNew; b.hidden = !S.achNew; }
 function checkAch(){
   if (titleOn) return;
@@ -2643,7 +2669,7 @@ let openDr = null;
 const DR = {shop:[$('shopDrawer'), $('shopBtn')], zukan:[$('zukanDrawer'), $('zukanBtn')]};
 function openDrawer(name){
   closeDrawers(true);
-  $('toast').classList.remove('show'); $('achPop').classList.remove('show');
+  $('toast').classList.remove('show'); $('achPop').classList.remove('show'); hideRarePop();
   const [dr, btn] = DR[name];
   openDr = name;
   if (name === 'shop') setShopTab(shopTab); else { if (S.znew.length && !S.znew.some(k => KINDS[k].cat === zkTab)) zkTab = KINDS[S.znew[0]].cat; renderZukan(); }
