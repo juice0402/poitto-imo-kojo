@@ -22,6 +22,7 @@
 ## ビルドと確かめ
 - `node tools/build.mjs`：index.html を作る（Node の標準だけ）
 - `node tools/build.mjs --check`（＝ `npm test`）：index.html が src と同じか
+- `tools/release/tag_releases.py`：RELEASES.md の版でタグのないものにタグと Releases（main へのマージで .github/workflows/release.yml が動かす）
 - `python3 tools/loadtest.py`：負荷テスト（Playwright。転生をくり返し・施設を大量にして、1コマの時間とエラーを見る）
 
 ## 枠の決まり（ver 2.4〜）
