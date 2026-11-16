@@ -92,10 +92,15 @@ button.pix:active:not([aria-disabled="true"]){transform:translateY(var(--u));--d
 .quest.slout{animation:qout .2s steps(4) forwards}
 @keyframes qin{from{transform:translateX(calc(100% + 24px))}}
 @keyframes qout{to{transform:translateX(calc(100% + 24px))}}
-.qtab{position:absolute;right:calc(var(--px)*-2);top:calc(env(safe-area-inset-top,0px) + 18px + max(44px,calc(var(--px)*16)));pointer-events:auto;min-height:44px;display:flex;flex-direction:column;justify-content:center;gap:4px;padding:4px max(14px,calc(env(safe-area-inset-right,0px) + 8px)) 6px 10px;line-height:1.2}
-.qtbar{display:block;height:var(--px);background:var(--gold-lo)}
+.qtab{position:absolute;right:calc(var(--px)*-2);top:calc(env(safe-area-inset-top,0px) + 34px + max(44px,calc(var(--px)*16)));pointer-events:auto;min-height:44px;display:flex;flex-direction:column;justify-content:center;gap:5px;padding:5px max(14px,calc(env(safe-area-inset-right,0px) + 8px)) 7px calc(10px + var(--px)*3);line-height:1.2;--bg:#fff09c;--h2:#fffbe0;--l2:#e3c857;color:var(--ink);animation:peek 5s steps(1) infinite}
+.qtab::before{content:"";position:absolute;left:0;top:0;bottom:0;width:calc(var(--px)*2);background:#f0d360;box-shadow:inset calc(var(--px)*-1) 0 0 #d9b843}
+.qtl{display:flex;align-items:center;gap:7px}
+.chev{display:block;flex:none;width:var(--px);height:var(--px);margin:0 var(--px);background:var(--ink-2);box-shadow:var(--px) calc(var(--px)*-1) 0 var(--ink-2),var(--px) var(--px) 0 var(--ink-2)}
+@keyframes peek{88%{transform:translateX(calc(var(--px)*-3))}92%{transform:translateX(calc(var(--px)*-1))}96%{transform:none}}
+@media (prefers-reduced-motion:reduce){.qtab{animation:none}}
+.qtbar{display:block;height:var(--px);background:#e3c857}
 .qtbar i{display:block;height:100%;width:0;background:var(--ink)}
-.quest[hidden] ~ .fever{margin-top:calc(max(44px,calc(var(--px)*16)) + 8px)}
+.quest[hidden] ~ .fever{margin-top:calc(max(44px,calc(var(--px)*16)) + 24px)}
 .znew{position:absolute;top:-10px;right:-8px;padding:0 5px;line-height:1.4;color:#fff;--bg:var(--red);--h2:#ff8c74;--l2:#9e2f1c}
 .znew.hop{animation:hop .6s steps(6)}
 @keyframes hop{0%,100%{transform:none}17%{transform:translateY(calc(var(--px)*-6))}34%{transform:translateY(calc(var(--px)*-2))}50%{transform:translateY(calc(var(--px)*-4))}67%{transform:translateY(calc(var(--px)*-1))}}
@@ -317,7 +322,7 @@ button.pix:active:not([aria-disabled="true"]){transform:translateY(var(--u));--d
     </div>
   </div>
   <div class="quest" id="quest" hidden><span class="qtag">めあて</span><span id="qText">芋を10こ出荷する</span><span id="qRew"></span><span class="qbar"><i id="qFill"></i></span><span id="qProg">0/10</span></div>
-  <button class="qtab pix gold" id="questTab" type="button" aria-label="めあてを見る" aria-expanded="false"><span>めあて</span><span class="qtbar"><i id="qTabFill"></i></span></button>
+  <button class="qtab pix" id="questTab" type="button" aria-label="めあてを見る" aria-expanded="false"><span class="qtl"><i class="chev"></i>めあて</span><span class="qtbar"><i id="qTabFill"></i></span></button>
   <div class="fever pix gold" id="fever" hidden><span id="feverName">フィーバー！</span> <b id="feverM">5</b>倍 あと <b id="feverT">20</b>秒</div>
 </header>
 <div class="toast pix" id="toast" role="status" aria-live="polite"></div>
@@ -437,7 +442,7 @@ button.pix:active:not([aria-disabled="true"]){transform:translateY(var(--u));--d
   <div class="logo"><span class="l1">ぽいっと！</span><span class="l2">いも工場</span></div>
   <div class="tpots" id="tpots"></div>
   <p class="tap">タップしてはじめる</p>
-  <p class="tver">ver 1.3</p>
+  <p class="tver">ver 1.4</p>
 </div>
 
 <script>
@@ -1464,9 +1469,9 @@ const TIERS = {
 const TIER_PRE = ['金の', 'ダイヤの', '銀河の', '伝説の', '神話の', '夢の', '無限の', '究極の'];
 const TIER_NEED = [1, 5, 25, 50, 100, 150, 200, 250, 300, 350, 400, 450], TIER_COST = [10, 50, 500, 5000, 5e5, 5e7, 5e9, 5e11, 5e13, 5e15, 5e17, 5e19];
 const STN = [
-  {b:'part', side:-1, base:7.0, reach:10, speak:'ポイッ'},
-  {b:'air',  side: 1, base:4.5, reach:10, speak:'シュッ'},
-  {b:'robo', side:-1, base:2.4, reach:11, speak:'ガシッ'},
+  {b:'part', side:-1, base:7.0, reach:10, speak:'ポイッ', cap:8, sp:12},
+  {b:'air',  side: 1, base:4.5, reach:10, speak:'シュッ', cap:5, sp:14},
+  {b:'robo', side:-1, base:2.4, reach:11, speak:'ガシッ', cap:3, sp:16},
 ];
 const STN_OF = Object.fromEntries(STN.map(s => [s.b, s]));
 const UPG = [];
@@ -1978,7 +1983,9 @@ const BGM = (() => {
 /* ---------- ベルトの上 ---------- */
 let pots = [], flies = [], parts = [], coinsFly = [], texts = [], ripples = [];
 let T = 0, beltOff = 0, spawnT = .3, feverT = 0, shake = 0, flashBad = 0, lampT = 0, lampGood = true, streamT = 0, goalT = 0, saveT = 0, achT = 0;
-const ST = {part:{t:0, anim:0, tx:0, ty:0}, air:{t:0, anim:0, tx:0, ty:0}, robo:{t:0, anim:0, tx:0, ty:0}};
+const ST = {part:{t:0, anim:0, tx:0, ty:0, who:0}, air:{t:0, anim:0, tx:0, ty:0, who:0}, robo:{t:0, anim:0, tx:0, ty:0, who:0}};
+/* 施設の人や機械は、やとった数だけ通路にならぶ（cap まで）。1人目がいつもの場所、あとは上下に交互 */
+function stYs(b){ const s = STN_OF[b], n = Math.min(S.bld[b] || 0, s.cap), ys = []; for (let i = 0; i < n; i++){ const k = i ? (i % 2 ? -1 : 1)*Math.ceil(i/2) : 0; ys.push(G.st[b] + k*s.sp); } return ys; }
 let titleOn = true;
 
 function pickW(table){
@@ -2102,10 +2109,10 @@ function beltTick(dt){
     if (st.anim > 0) st.anim -= dt;
     st.t = Math.min(st.t + dt, 60);
     if (st.t < stCd(s.b)) continue;
-    const y0 = G.st[s.b]; let best = null, bd = 1e9;
-    for (const p of pots){ if (p.dead || p.tut || KINDS[p.kind].cat !== 'bad') continue; const d = Math.abs(p.y - y0); if (d < s.reach && d < bd){ bd = d; best = p; } }
+    const ys = stYs(s.b); let best = null, bd = 1e9, who = 0;
+    for (const p of pots){ if (p.dead || p.tut || KINDS[p.kind].cat !== 'bad') continue; for (let i = 0; i < ys.length; i++){ const d = Math.abs(p.y - ys[i]); if (d < s.reach && d < bd){ bd = d; best = p; who = i; } } }
     if (!best) continue;
-    st.t = 0; st.anim = s.b === 'robo' ? .36 : .3; st.tx = best.x; st.ty = best.y; best.dead = true;
+    st.who = who; st.t = 0; st.anim = s.b === 'robo' ? .36 : .3; st.tx = best.x; st.ty = best.y; best.dead = true;
     flyOff(best, s.side); puff(best.x, best.y, '#ffffff', 4);
     if (!demo){
       const v = D.flickBase*F(); earn(v); S.stats.auto++;
@@ -2183,31 +2190,39 @@ function arm(x0, y0, x1, y1){
   for (const [s, c] of [[3, '#2a1d12'], [1, '#f2c230']]){ lc.fillStyle = c; for (let i = 0; i <= n; i++){ const x = Math.round(x0 + (x1 - x0)*i/n), y = Math.round(y0 + (y1 - y0)*i/n); lc.fillRect(x - (s >> 1), y - (s >> 1), s, s); } }
 }
 function drawStations(){
-  const bob = ((T*2) | 0) % 2;
+  const order = ys => ys.map((y, i) => [y, i]).sort((a, b) => a[0] - b[0]);
   if (S.bld.part){
-    const st = ST.part, y = G.st.part, x = G.x0 - 13;
-    lc.fillStyle = '#15171c'; lc.fillRect(x + 4, y + 3, 12, 4); lc.fillStyle = '#8a93a1'; lc.fillRect(x + 5, y + 3, 10, 1); lc.fillStyle = '#5c6370'; lc.fillRect(x + 5, y + 4, 10, 2);
-    lc.drawImage(ART.worker(st.anim > 0 ? 1 : 0), x, y - 16 + (st.anim > 0 ? 0 : bob));
+    const st = ST.part, x = G.x0 - 13;
+    for (const [y, i] of order(stYs('part'))){
+      const act = st.anim > 0 && st.who === i, bob = ((T*2 + i*.37) | 0) % 2;
+      lc.fillStyle = '#15171c'; lc.fillRect(x + 4, y + 3, 12, 4); lc.fillStyle = '#8a93a1'; lc.fillRect(x + 5, y + 3, 10, 1); lc.fillStyle = '#5c6370'; lc.fillRect(x + 5, y + 4, 10, 2);
+      lc.drawImage(ART.worker(act ? 1 : 0), x, y - 16 + (act ? 0 : bob));
+    }
   }
   if (S.bld.air){
-    const st = ST.air, y = G.st.air, x = G.x1 - 5;
-    lc.drawImage(ART.airBox(), x, y - 9);
-    if (st.anim > 0){
-      const k = 1 - st.anim/.3, nx = x + 1, len = Math.max(4, (nx - st.tx)*Math.min(1, k*1.6));
-      lc.globalAlpha = Math.min(1, st.anim/.15); lc.fillStyle = '#dff6ff';
-      for (const dy of [-2, 0, 2]){ const l = Math.round(len*(dy ? .75 : 1)); lc.fillRect(Math.round(nx - l), y + dy, l, 1); }
-      lc.globalAlpha = 1;
+    const st = ST.air, x = G.x1 - 5;
+    for (const [y, i] of order(stYs('air'))){
+      lc.drawImage(ART.airBox(), x, y - 9);
+      if (st.anim > 0 && st.who === i){
+        const k = 1 - st.anim/.3, nx = x + 1, len = Math.max(4, (nx - st.tx)*Math.min(1, k*1.6));
+        lc.globalAlpha = Math.min(1, st.anim/.15); lc.fillStyle = '#dff6ff';
+        for (const dy of [-2, 0, 2]){ const l = Math.round(len*(dy ? .75 : 1)); lc.fillRect(Math.round(nx - l), y + dy, l, 1); }
+        lc.globalAlpha = 1;
+      }
     }
   }
   if (S.bld.robo){
-    const st = ST.robo, y = G.st.robo, x = G.x0 - 11, pvx = x + 8, pvy = y - 3;
-    let ex = pvx + 10, ey = pvy - 3;
-    if (st.anim > 0){ const k = Math.sin(Math.PI*(1 - st.anim/.36)); ex = pvx + 10 + (st.tx - pvx - 10)*k; ey = pvy - 3 + (st.ty - pvy + 3)*k; }
-    const mx = (pvx + ex)/2, my = Math.min(pvy, ey) - 7;
-    lc.drawImage(ART.roboBase(), x, y - 9);
-    arm(pvx, pvy, mx, my); arm(mx, my, ex, ey);
-    lc.fillStyle = '#2a1d12'; lc.fillRect(Math.round(ex), Math.round(ey) - 3, 3, 7); lc.fillStyle = '#c9cfd8'; lc.fillRect(Math.round(ex) + 1, Math.round(ey) - 2, 1, 2); lc.fillRect(Math.round(ex) + 1, Math.round(ey) + 1, 1, 2);
-    lc.fillStyle = '#4fd8f5'; lc.fillRect(Math.round(mx), Math.round(my), 1, 1);
+    const st = ST.robo, x = G.x0 - 11;
+    for (const [y, i] of order(stYs('robo'))){
+      const pvx = x + 8, pvy = y - 3;
+      let ex = pvx + 10, ey = pvy - 3;
+      if (st.anim > 0 && st.who === i){ const k = Math.sin(Math.PI*(1 - st.anim/.36)); ex = pvx + 10 + (st.tx - pvx - 10)*k; ey = pvy - 3 + (st.ty - pvy + 3)*k; }
+      const mx = (pvx + ex)/2, my = Math.min(pvy, ey) - 7;
+      lc.drawImage(ART.roboBase(), x, y - 9);
+      arm(pvx, pvy, mx, my); arm(mx, my, ex, ey);
+      lc.fillStyle = '#2a1d12'; lc.fillRect(Math.round(ex), Math.round(ey) - 3, 3, 7); lc.fillStyle = '#c9cfd8'; lc.fillRect(Math.round(ex) + 1, Math.round(ey) - 2, 1, 2); lc.fillRect(Math.round(ex) + 1, Math.round(ey) + 1, 1, 2);
+      lc.fillStyle = '#4fd8f5'; lc.fillRect(Math.round(mx), Math.round(my), 1, 1);
+    }
   }
 }
 function drawFly(f){
@@ -2257,10 +2272,9 @@ function drawOverlay(){
   ctx.fillText('出荷', Math.round(G.plateX*A), Math.round((G.gateY + G.plateY)*A));
   if (!titleOn){
     const lab = [];
-    if (S.bld.part) lab.push([G.x0 - 4, G.st.part - 20, S.bld.part]);
-    if (S.bld.air) lab.push([G.x1 + 4, G.st.air - 14, S.bld.air]);
-    if (S.bld.robo) lab.push([G.x0 - 5, G.st.robo + 7, S.bld.robo]);
-    for (const [x0, y, n] of lab){ if (n < 2) continue; const s = '×' + n, hw = (8 + 4*(s.length - 1))/A + 2, x = clamp(x0, hw, AW - hw); ctx.lineWidth = 4; ctx.strokeStyle = '#1a120c'; ctx.strokeText(s, Math.round(x*A), Math.round(y*A)); ctx.fillStyle = '#fff3d0'; ctx.fillText(s, Math.round(x*A), Math.round(y*A)); }
+    for (const s0 of STN){ const n = (S.bld[s0.b] || 0) - s0.cap; if (n <= 0) continue; const ys = stYs(s0.b), top = Math.min(...ys), bot = Math.max(...ys);
+      lab.push(s0.b === 'part' ? [G.x0 - 4, top - 20, n] : s0.b === 'air' ? [G.x1 + 4, top - 14, n] : [G.x0 - 3, bot + 8, n]); }
+    for (const [x0, y, n] of lab){ const s = '+' + fmt(n), hw = (8 + 4*(s.length - 1))/A + 2, x = clamp(x0, hw, AW - hw); ctx.lineWidth = 4; ctx.strokeStyle = '#1a120c'; ctx.strokeText(s, Math.round(x*A), Math.round(y*A)); ctx.fillStyle = '#fff3d0'; ctx.fillText(s, Math.round(x*A), Math.round(y*A)); }
   }
   if (tutPot && tutPot.y > 0 && !titleOn){
     const q = tutPot, s = q.tut === 'bad' ? 'タップでポイッ！' : 'キラキラはタップでゲット！', hw = s.length*8/A + 2;
@@ -2710,7 +2724,7 @@ window.addEventListener('pagehide', () => { if (!titleOn) save(); });
 function renderTitlePots(){ $('tpots').innerHTML = ['futsu', 'heart', 'me'].map((k, i) => `<span class="tp" style="animation-delay:${i*.18}s">${img('p:' + k, () => ART.potatoPB(k), A*1.34)}</span>`).join(''); }
 function startGame(){
   if (!titleOn) return;
-  ensureAudio(); titleOn = false; $('title').hidden = true; questShow(4);
+  ensureAudio(); titleOn = false; $('title').hidden = true;
   pots = []; spawnT = .4;
   if (awayPend) showAway(); else if (S.stats.play > 30) toast('おかえり！工場は今日も動いてるよ', 'new');
   checkAch();
