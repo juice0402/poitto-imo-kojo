@@ -4,7 +4,7 @@
 探すときは `grep -n '関数名' index.html | cut -c1-200` → 前後だけ読む。
 
 ## 大きなまとまり（行の目安）
-- 7〜329：CSS（.hud 上の表示・.wallet::before お金のうしろの黒い板・.qnote めあての付箋・.toast/.achpop/.rpop お知らせ・.drawer 引き出し・.brow 施設の行・.zgrid 図鑑）
+- 7〜329：CSS（.hud 上の表示・.hud::before 上の黒い帯・.qnote めあての付箋・.toast/.achpop/.rpop お知らせ・.drawer 引き出し・.brow 施設の行・.zgrid 図鑑）
 - 330〜466：画面の部品（HTML）
 - 462〜1293：絵の表 ART（芋の形 POT・色 PAL・飾り XA/XB・アイコン IC・パートさんなど）
 - 1294〜2830：ゲーム本体（下）

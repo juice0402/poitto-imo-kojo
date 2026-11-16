@@ -67,9 +67,9 @@ button.pix:active:not([aria-disabled="true"]){transform:translateY(var(--u));--d
 .rate{line-height:16px;margin-top:0}
 .wallet{--o:#20140a;color:#fff3d6;text-shadow:var(--ux) 0 0 var(--o),calc(var(--ux)*-1) 0 0 var(--o),0 var(--ux) 0 var(--o),0 calc(var(--ux)*-1) 0 var(--o),var(--ux) var(--ux) 0 var(--o),calc(var(--ux)*-1) var(--ux) 0 var(--o),var(--ux) calc(var(--ux)*-1) 0 var(--o),calc(var(--ux)*-1) calc(var(--ux)*-1) 0 var(--o)}
 .wallet .rate{color:#c4f29c}
-/* ver 2.6：お金のうしろに、うすい黒の板（ベルトの黄色い線とかぶっても読めるように）。板は大きさに入らないので、ならびは変わらない */
-.wallet{position:relative}
-.wallet::before{content:"";position:absolute;inset:-4px -12px -4px -8px;z-index:-1;background:rgba(24,15,8,.68);clip-path:polygon(var(--px) 0,calc(100% - var(--px)) 0,100% var(--px),100% calc(100% - var(--px)),calc(100% - var(--px)) 100%,var(--px) 100%,0 calc(100% - var(--px)),0 var(--px));pointer-events:none}
+/* ver 2.6：画面の上を横いっぱいに、うすい黒の帯（ベルトの黄色い線とかぶっても読めるように）。「毎秒」の行のまん中から下へ、だんだん消える。帯は大きさに入らないので、ならびは変わらない */
+.hud{--hh:max(44px,calc(var(--px)*16))}
+.hud::before{content:"";position:absolute;left:0;right:0;top:0;z-index:-1;height:calc(env(safe-area-inset-top,0px) + 10px + var(--hh)/2 + 48px);background:linear-gradient(to bottom,rgba(24,15,8,.68) 0,rgba(24,15,8,.68) calc(100% - 32px),rgba(24,15,8,.4) calc(100% - 16px),rgba(24,15,8,0) 100%);pointer-events:none}
 .wallet.hurt{animation:hurt2 .4s steps(6)}
 .wallet.hurt #coins{animation:hurtc .4s steps(2)}
 @keyframes hurtc{0%,60%{color:#ff9d88}}
