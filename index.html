@@ -89,14 +89,14 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
 .qtl{display:flex;align-items:center;gap:7px;height:1.2em}
 .chev{display:block;flex:none;width:var(--px);height:var(--px);margin:0 var(--px);background:var(--ink-2);box-shadow:var(--px) calc(var(--px)*-1) 0 var(--ink-2),var(--px) var(--px) 0 var(--ink-2)}
 .qnote.open .chev{transform:translateX(var(--px)) scaleX(-1)}
-.q2{display:flex;align-items:center;gap:8px;height:14px;font-size:14px;line-height:14px}
+.q2{display:flex;align-items:center;gap:8px;height:16px;line-height:16px}
 .qtbar{display:block;align-self:center;width:100%;height:var(--px);background:#e3c857}
 .qtbar i,.qnote .qbar i{display:block;height:100%;width:0;background:var(--ink)}
 .qnote.open .qtbar{visibility:hidden}
 #qText{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;height:1.2em}
 .qnote .qbar{flex:1 1 auto;min-width:48px;height:var(--px);margin:0;background:#e3c857;box-shadow:none}
-#qProg{color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
-#qRew{color:var(--gold-tx);white-space:nowrap}
+#qProg{color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+#qRew{color:#7a3e00;white-space:nowrap}
 .fever{margin-top:calc(max(44px,calc(var(--px)*16)) + 24px)}
 .znew{position:absolute;top:-10px;right:-8px;padding:0 5px;line-height:1.4;color:#fff;--bg:var(--red);--h2:#ff8c74;--l2:#9e2f1c}
 .znew.hop{animation:hop .6s steps(6)}
@@ -436,7 +436,7 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
   <div class="logo"><span class="l1">ぽいっと！</span><span class="l2">いも工場</span></div>
   <div class="tpots" id="tpots"></div>
   <p class="tap">タップしてはじめる</p>
-  <p class="tver">ver 1.6</p>
+  <p class="tver">ver 1.7</p>
 </div>
 
 <script>
@@ -1794,7 +1794,7 @@ function resize(){
   cachePos(); requestAnimationFrame(cachePos);
 }
 function layout(){
-  const RAIL = 8, WALK = 10, inner = Math.min(AW - RAIL*2 - WALK*2, 128);
+  const RAIL = 8, WALK = 14, inner = Math.min(AW - RAIL*2 - WALK*2, 128);
   G.x0 = Math.floor((AW - inner - RAIL*2)/2); G.ix0 = G.x0 + RAIL; G.ix1 = G.ix0 + inner; G.x1 = G.ix1 + RAIL;
   G.gateH = 26; G.gateY = AH - SAFE_B - G.gateH;
   G.speed = (G.gateY + 24)/9;
@@ -2186,7 +2186,7 @@ function arm(x0, y0, x1, y1){
 function drawStations(){
   const order = ys => ys.map((y, i) => [y, i]).sort((a, b) => a[0] - b[0]);
   if (S.bld.part){
-    const st = ST.part, x = G.x0 - 13;
+    const st = ST.part, x = G.x0 - 16;
     for (const [y, i] of order(stYs('part'))){
       const act = st.anim > 0 && st.who === i, bob = ((T*2 + i*.37) | 0) % 2;
       lc.fillStyle = '#15171c'; lc.fillRect(x + 4, y + 3, 12, 4); lc.fillStyle = '#8a93a1'; lc.fillRect(x + 5, y + 3, 10, 1); lc.fillStyle = '#5c6370'; lc.fillRect(x + 5, y + 4, 10, 2);
@@ -2194,7 +2194,7 @@ function drawStations(){
     }
   }
   if (S.bld.air){
-    const st = ST.air, x = G.x1 - 5;
+    const st = ST.air, x = G.x1 - 3;
     for (const [y, i] of order(stYs('air'))){
       lc.drawImage(ART.airBox(), x, y - 9);
       if (st.anim > 0 && st.who === i){
@@ -2206,7 +2206,7 @@ function drawStations(){
     }
   }
   if (S.bld.robo){
-    const st = ST.robo, x = G.x0 - 11;
+    const st = ST.robo, x = G.x0 - 15;
     for (const [y, i] of order(stYs('robo'))){
       const pvx = x + 8, pvy = y - 3;
       let ex = pvx + 10, ey = pvy - 3;
@@ -2267,7 +2267,7 @@ function drawOverlay(){
   if (!titleOn){
     const lab = [];
     for (const s0 of STN){ const n = (S.bld[s0.b] || 0) - s0.cap; if (n <= 0) continue; const ys = stYs(s0.b), top = Math.min(...ys), bot = Math.max(...ys);
-      lab.push(s0.b === 'part' ? [G.x0 - 4, top - 20, n] : s0.b === 'air' ? [G.x1 + 4, top - 14, n] : [G.x0 - 3, bot + 8, n]); }
+      lab.push(s0.b === 'part' ? [G.x0 - 7, top - 20, n] : s0.b === 'air' ? [G.x1 + 6, top - 14, n] : [G.x0 - 7, bot + 8, n]); }
     for (const [x0, y, n] of lab){ const s = '+' + fmt(n), hw = (8 + 4*(s.length - 1))/A + 2, x = clamp(x0, hw, AW - hw); ctx.lineWidth = 4; ctx.strokeStyle = '#1a120c'; ctx.strokeText(s, Math.round(x*A), Math.round(y*A)); ctx.fillStyle = '#fff3d0'; ctx.fillText(s, Math.round(x*A), Math.round(y*A)); }
   }
   if (tutPot && tutPot.y > 0 && !titleOn){
