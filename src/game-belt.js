@@ -1,6 +1,7 @@
 /* ---------- ベルトの上 ---------- */
 let pots = [], flies = [], parts = [], coinsFly = [], texts = [], ripples = [];
-let T = 0, beltOff = 0, spawnT = .3, feverT = 0, shake = 0, flashBad = 0, lampT = 0, lampGood = true, streamT = 0, goalT = 0, saveT = 0, achT = 0;
+let T = 0, beltOff = 0, spawnT = .3, feverT = 0, shake = 0, flashBad = 0, lampT = 0, lampGood = true, streamT = 0, goalT = 0, saveT = 0, achT = 0, bumpT = -1;
+const walletEl = $('wallet');
 const ST = {part:{t:0, anim:0, tx:0, ty:0, who:0}, air:{t:0, anim:0, tx:0, ty:0, who:0}, robo:{t:0, anim:0, tx:0, ty:0, who:0}};
 /* 施設の人や機械は、やとった数だけ通路にならぶ（cap まで）。1人目がいつもの場所、あとは上下に交互 */
 function stYs(b){ const s = STN_OF[b], n = Math.min(S.bld[b] || 0, s.cap), ys = []; for (let i = 0; i < n; i++){ const k = i ? (i % 2 ? -1 : 1)*Math.ceil(i/2) : 0; ys.push(G.st[b] + k*s.sp); } return ys; }
@@ -150,7 +151,10 @@ function fxTick(dt){
   flies = flies.filter(f => !f.dead);
   for (const p of parts){ p.life += dt; p.x += p.vx*dt; p.y += p.vy*dt; p.vy += (p.spark ? 30 : 110)*dt; }
   parts = parts.filter(p => p.life < p.max);
-  for (const c of coinsFly){ c.t += dt; if (c.t >= c.d){ c.dead = true; restart($('wallet'), 'bump'); if (!c.quiet) SFX.tick(); } }
+  let bump = false;
+  for (const c of coinsFly){ c.t += dt; if (c.t >= c.d){ c.dead = true; bump = true; if (!c.quiet) SFX.tick(); } }
+  /* お金のコインのぽよん：コインが続けて着いても、0.16秒（ぽよんの長さ）に1回だけ。着くたびにやると、そのたびに画面の計算がやり直しになって重い（ver 2.7） */
+  if (bump && T - bumpT >= .16){ bumpT = T; restart(walletEl, 'bump'); }
   coinsFly = coinsFly.filter(c => !c.dead);
   for (const t of texts) t.life += dt;
   texts = texts.filter(t => t.life < t.max);

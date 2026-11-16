@@ -33,16 +33,17 @@ function fitText(root){ if (!root) return;
 const fitAll = () => ['bldList', 'perkList', 'upgDetail', 'zkGrid', 'achList'].forEach(id => fitText($(id)));
 window.addEventListener('resize', fitAll); if (document.fonts) document.fonts.ready.then(fitAll);
 
-let disp = 0, shownC = -1, rateT = 0, affT = 0;
+let disp = 0, shownC = -1, shownS = '', shownR = '', rateT = 0, affT = 0;
 function hudTick(dt){
   const diff = S.coins - disp; disp = Math.abs(diff) < .5 ? S.coins : disp + diff*Math.min(1, dt*10);
-  const c = Math.floor(disp); if (c !== shownC){ shownC = c; const s = fmt(c); coinsEl.textContent = s; shopCoinsEl.textContent = s; const fs = s.length > 9 ? '20px' : s.length > 7 ? '24px' : ''; if (coinsEl.style.fontSize !== fs){ coinsEl.style.fontSize = fs; shopCoinsEl.style.fontSize = fs; } }
+  /* 文字が変わったときだけ書きかえる（「1.23兆」のままなら画面はさわらない・ver 2.7） */
+  const c = Math.floor(disp); if (c !== shownC){ shownC = c; const s = fmt(c); if (s !== shownS){ shownS = s; coinsEl.textContent = s; shopCoinsEl.textContent = s; const fs = s.length > 9 ? '20px' : s.length > 7 ? '24px' : ''; if (coinsEl.style.fontSize !== fs){ coinsEl.style.fontSize = fs; shopCoinsEl.style.fontSize = fs; } } }
   rateT += dt;
   if (paused()) calmT = .5; else if (calmT > 0) calmT -= dt;
   if (qDoneQ.length && noticeOk()) checkGoal();
   if (achQ.length) showAchPop();
   if (rpTimer && openDr) hideRarePop();
-  if (rateT > .25){ rateT = 0; const r = '毎秒 +' + fmtR(D.rate*F()) + '円'; rateEl.textContent = r; shopRateEl.textContent = r; if (feverT > 0) $('feverT').textContent = Math.ceil(feverT); }
+  if (rateT > .25){ rateT = 0; const r = '毎秒 +' + fmtR(D.rate*F()) + '円'; if (r !== shownR){ shownR = r; rateEl.textContent = r; shopRateEl.textContent = r; } if (feverT > 0) $('feverT').textContent = Math.ceil(feverT); }
   if (questT > 0 && !paused()){ questT -= dt; if (questT <= 0) questHide(); }
   affT += dt; if (affT > .2){ affT = 0; updateAfford();
     if (!(S.tut & 4) && S.bld.part > 0){ S.tut |= 4; save(); }
@@ -226,7 +227,7 @@ function updateAfford(){
   }
   const list = availUpgs();
   for (const u of list){ if (S.coins >= u.cost) n++; if (openDr === 'shop'){ const el = upgGrid.querySelector(`[data-u="${u.id}"]`); if (el) el.classList.toggle('ng', S.coins < u.cost); } }
-  const ub = $('udBuy'); if (ub && UI[ub.dataset.u]) ub.setAttribute('aria-disabled', String(S.coins < UI[ub.dataset.u].cost));
+  const ub = $('udBuy'); if (ub && UI[ub.dataset.u]) setAttr(ub, 'aria-disabled', String(S.coins < UI[ub.dataset.u].cost));
   if (openDr === 'shop' && shopTab === 'f'){ const sig = list.map(u => u.id).join(',') + '|' + vis.length + '|' + vis.filter(v => v.mys).map(v => v.b.id).join(''); if (sig !== shopSig) renderShop(); }
   const sr = seedReady(); if (sr) n++; $('seedDot').hidden = !sr; seedTick();
   if (n !== lastBadge){
@@ -234,11 +235,13 @@ function updateAfford(){
     if (n > lastBadge && lastBadge >= 0) restart(b, 'hop');
     lastBadge = n; b.textContent = n; b.hidden = n === 0;
   }
-  { const b = $('shopBadge'), pr = canPres(); b.classList.toggle('pr', pr); if (pr){ b.textContent = '転生'; b.hidden = false; } else if (b.textContent === '転生'){ b.textContent = lastBadge; b.hidden = lastBadge === 0; }
+  { const b = $('shopBadge'), pr = canPres(); b.classList.toggle('pr', pr); if (pr){ if (b.textContent !== '転生') b.textContent = '転生'; b.hidden = false; } else if (b.textContent === '転生'){ b.textContent = lastBadge; b.hidden = lastBadge === 0; }
     $('shopBtn').classList.toggle('ready', n > 0);
-    $('shopBtn').setAttribute('aria-label', n ? `工場（${n}つ買える）` : '工場');
+    setAttr($('shopBtn'), 'aria-label', n ? `工場（${n}つ買える）` : '工場');
   }
 }
+/* 0.2秒ごとの見直しで、同じ中身を書きなおさない（ver 2.7） */
+function setAttr(el, k, v){ if (el.getAttribute(k) !== v) el.setAttribute(k, v); }
 function buyBld(id){
   const b = BI[id], cost = bldCost(b, S.buy);
   if (S.coins < cost){ toast(`あと ${fmt(cost - S.coins)}円 たりない`); SFX.no(); return; }

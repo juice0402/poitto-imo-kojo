@@ -1330,6 +1330,8 @@ const low = document.createElement('canvas'), lc = low.getContext('2d');
 const FONT = '"DotGothic16","Hiragino Kaku Gothic ProN","Yu Gothic",monospace';
 const KEY = 'imo-v2', OLD = 'imo-proto1-v1';
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+/* 数字の3けたごとの「,」は、作っておいた1つの NumberFormat で（toLocaleString は毎回作りなおすので重い。出る文字は同じ・ver 2.7）。fmt より前に要る */
+const NF = new Intl.NumberFormat('ja-JP');
 const UNITS = [[1e68,'無量大数'],[1e64,'不可思議'],[1e60,'那由他'],[1e56,'阿僧祇'],[1e52,'恒河沙'],[1e48,'極'],[1e44,'載'],[1e40,'正'],[1e36,'澗'],[1e32,'溝'],[1e28,'穣'],[1e24,'秭'],[1e20,'垓'],[1e16,'京'],[1e12,'兆'],[1e8,'億'],[1e4,'万']];
 
 /* ---------- いも ---------- */
@@ -1809,11 +1811,12 @@ function earn(v){ S.coins += v; S.stats.earned += v; S.stats.earnedRun += v; }
 /* ---------- 数字 ---------- */
 function fmt(n){
   n = Math.floor(Math.max(0, n));
-  if (n < 1e4) return n.toLocaleString('ja-JP');
+  if (n < 1e4) return NF.format(n);
   if (!isFinite(n)) return '∞';
-  if (n >= 1e136) return n.toExponential(2).replace('e+', '×10^');
+  /* 無量大数の上は「〇万無量大数」まで。1億無量大数（10^76）からは ×10^（企画メモのとおり・ver 2.7） */
+  if (n >= 1e76) return n.toExponential(2).replace('e+', '×10^');
   if (n >= 1e72) return fmt(n/1e68) + '無量大数';
-  for (const [v, u] of UNITS) if (n >= v){ const x = n/v; let s = x < 10 ? x.toFixed(2) : x < 100 ? x.toFixed(1) : Math.floor(x).toLocaleString('ja-JP'); if (s.includes('.')) s = s.replace(/0+$/, '').replace(/\.$/, ''); return s + u; }
+  for (const [v, u] of UNITS) if (n >= v){ const x = n/v; let s = x < 10 ? x.toFixed(2) : x < 100 ? x.toFixed(1) : NF.format(Math.floor(x)); if (s.includes('.')) s = s.replace(/0+$/, '').replace(/\.$/, ''); return s + u; }
   return String(n);
 }
 function fmtR(n){ if (n < 10){ const s = (Math.round(n*10)/10).toFixed(1); return s.endsWith('.0') ? s.slice(0, -2) : s; } return fmt(n); }
@@ -2025,7 +2028,8 @@ const BGM = (() => {
 
 /* ---------- ベルトの上 ---------- */
 let pots = [], flies = [], parts = [], coinsFly = [], texts = [], ripples = [];
-let T = 0, beltOff = 0, spawnT = .3, feverT = 0, shake = 0, flashBad = 0, lampT = 0, lampGood = true, streamT = 0, goalT = 0, saveT = 0, achT = 0;
+let T = 0, beltOff = 0, spawnT = .3, feverT = 0, shake = 0, flashBad = 0, lampT = 0, lampGood = true, streamT = 0, goalT = 0, saveT = 0, achT = 0, bumpT = -1;
+const walletEl = $('wallet');
 const ST = {part:{t:0, anim:0, tx:0, ty:0, who:0}, air:{t:0, anim:0, tx:0, ty:0, who:0}, robo:{t:0, anim:0, tx:0, ty:0, who:0}};
 /* 施設の人や機械は、やとった数だけ通路にならぶ（cap まで）。1人目がいつもの場所、あとは上下に交互 */
 function stYs(b){ const s = STN_OF[b], n = Math.min(S.bld[b] || 0, s.cap), ys = []; for (let i = 0; i < n; i++){ const k = i ? (i % 2 ? -1 : 1)*Math.ceil(i/2) : 0; ys.push(G.st[b] + k*s.sp); } return ys; }
@@ -2175,7 +2179,10 @@ function fxTick(dt){
   flies = flies.filter(f => !f.dead);
   for (const p of parts){ p.life += dt; p.x += p.vx*dt; p.y += p.vy*dt; p.vy += (p.spark ? 30 : 110)*dt; }
   parts = parts.filter(p => p.life < p.max);
-  for (const c of coinsFly){ c.t += dt; if (c.t >= c.d){ c.dead = true; restart($('wallet'), 'bump'); if (!c.quiet) SFX.tick(); } }
+  let bump = false;
+  for (const c of coinsFly){ c.t += dt; if (c.t >= c.d){ c.dead = true; bump = true; if (!c.quiet) SFX.tick(); } }
+  /* お金のコインのぽよん：コインが続けて着いても、0.16秒（ぽよんの長さ）に1回だけ。着くたびにやると、そのたびに画面の計算がやり直しになって重い（ver 2.7） */
+  if (bump && T - bumpT >= .16){ bumpT = T; restart(walletEl, 'bump'); }
   coinsFly = coinsFly.filter(c => !c.dead);
   for (const t of texts) t.life += dt;
   texts = texts.filter(t => t.life < t.max);
@@ -2381,16 +2388,17 @@ function fitText(root){ if (!root) return;
 const fitAll = () => ['bldList', 'perkList', 'upgDetail', 'zkGrid', 'achList'].forEach(id => fitText($(id)));
 window.addEventListener('resize', fitAll); if (document.fonts) document.fonts.ready.then(fitAll);
 
-let disp = 0, shownC = -1, rateT = 0, affT = 0;
+let disp = 0, shownC = -1, shownS = '', shownR = '', rateT = 0, affT = 0;
 function hudTick(dt){
   const diff = S.coins - disp; disp = Math.abs(diff) < .5 ? S.coins : disp + diff*Math.min(1, dt*10);
-  const c = Math.floor(disp); if (c !== shownC){ shownC = c; const s = fmt(c); coinsEl.textContent = s; shopCoinsEl.textContent = s; const fs = s.length > 9 ? '20px' : s.length > 7 ? '24px' : ''; if (coinsEl.style.fontSize !== fs){ coinsEl.style.fontSize = fs; shopCoinsEl.style.fontSize = fs; } }
+  /* 文字が変わったときだけ書きかえる（「1.23兆」のままなら画面はさわらない・ver 2.7） */
+  const c = Math.floor(disp); if (c !== shownC){ shownC = c; const s = fmt(c); if (s !== shownS){ shownS = s; coinsEl.textContent = s; shopCoinsEl.textContent = s; const fs = s.length > 9 ? '20px' : s.length > 7 ? '24px' : ''; if (coinsEl.style.fontSize !== fs){ coinsEl.style.fontSize = fs; shopCoinsEl.style.fontSize = fs; } } }
   rateT += dt;
   if (paused()) calmT = .5; else if (calmT > 0) calmT -= dt;
   if (qDoneQ.length && noticeOk()) checkGoal();
   if (achQ.length) showAchPop();
   if (rpTimer && openDr) hideRarePop();
-  if (rateT > .25){ rateT = 0; const r = '毎秒 +' + fmtR(D.rate*F()) + '円'; rateEl.textContent = r; shopRateEl.textContent = r; if (feverT > 0) $('feverT').textContent = Math.ceil(feverT); }
+  if (rateT > .25){ rateT = 0; const r = '毎秒 +' + fmtR(D.rate*F()) + '円'; if (r !== shownR){ shownR = r; rateEl.textContent = r; shopRateEl.textContent = r; } if (feverT > 0) $('feverT').textContent = Math.ceil(feverT); }
   if (questT > 0 && !paused()){ questT -= dt; if (questT <= 0) questHide(); }
   affT += dt; if (affT > .2){ affT = 0; updateAfford();
     if (!(S.tut & 4) && S.bld.part > 0){ S.tut |= 4; save(); }
@@ -2574,7 +2582,7 @@ function updateAfford(){
   }
   const list = availUpgs();
   for (const u of list){ if (S.coins >= u.cost) n++; if (openDr === 'shop'){ const el = upgGrid.querySelector(`[data-u="${u.id}"]`); if (el) el.classList.toggle('ng', S.coins < u.cost); } }
-  const ub = $('udBuy'); if (ub && UI[ub.dataset.u]) ub.setAttribute('aria-disabled', String(S.coins < UI[ub.dataset.u].cost));
+  const ub = $('udBuy'); if (ub && UI[ub.dataset.u]) setAttr(ub, 'aria-disabled', String(S.coins < UI[ub.dataset.u].cost));
   if (openDr === 'shop' && shopTab === 'f'){ const sig = list.map(u => u.id).join(',') + '|' + vis.length + '|' + vis.filter(v => v.mys).map(v => v.b.id).join(''); if (sig !== shopSig) renderShop(); }
   const sr = seedReady(); if (sr) n++; $('seedDot').hidden = !sr; seedTick();
   if (n !== lastBadge){
@@ -2582,11 +2590,13 @@ function updateAfford(){
     if (n > lastBadge && lastBadge >= 0) restart(b, 'hop');
     lastBadge = n; b.textContent = n; b.hidden = n === 0;
   }
-  { const b = $('shopBadge'), pr = canPres(); b.classList.toggle('pr', pr); if (pr){ b.textContent = '転生'; b.hidden = false; } else if (b.textContent === '転生'){ b.textContent = lastBadge; b.hidden = lastBadge === 0; }
+  { const b = $('shopBadge'), pr = canPres(); b.classList.toggle('pr', pr); if (pr){ if (b.textContent !== '転生') b.textContent = '転生'; b.hidden = false; } else if (b.textContent === '転生'){ b.textContent = lastBadge; b.hidden = lastBadge === 0; }
     $('shopBtn').classList.toggle('ready', n > 0);
-    $('shopBtn').setAttribute('aria-label', n ? `工場（${n}つ買える）` : '工場');
+    setAttr($('shopBtn'), 'aria-label', n ? `工場（${n}つ買える）` : '工場');
   }
 }
+/* 0.2秒ごとの見直しで、同じ中身を書きなおさない（ver 2.7） */
+function setAttr(el, k, v){ if (el.getAttribute(k) !== v) el.setAttribute(k, v); }
 function buyBld(id){
   const b = BI[id], cost = bldCost(b, S.buy);
   if (S.coins < cost){ toast(`あと ${fmt(cost - S.coins)}円 たりない`); SFX.no(); return; }
@@ -2826,7 +2836,9 @@ document.addEventListener('keydown', e => {
   else if (!$('menuModal').hidden) $('menuModal').hidden = true;
   else if (openDr) closeDrawers();
 });
-const paused = () => titleOn || !!openDr || !$('cardModal').hidden || !$('helpModal').hidden || !$('menuModal').hidden || !$('achModal').hidden || !$('awayModal').hidden || !$('presModal').hidden;
+/* 1コマに何回もよぶので、窓の部品は先にさがしておく（ver 2.7） */
+const PAUSE_EL = ['cardModal', 'helpModal', 'menuModal', 'achModal', 'awayModal', 'presModal'].map($);
+const paused = () => titleOn || !!openDr || PAUSE_EL.some(e => !e.hidden);
 cv.addEventListener('pointerdown', e => { ensureAudio(); if (paused()) return; tapAt(e.clientX/A, e.clientY/A); });
 let hiddenAt = 0;
 document.addEventListener('visibilitychange', () => {

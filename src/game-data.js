@@ -7,6 +7,8 @@ const low = document.createElement('canvas'), lc = low.getContext('2d');
 const FONT = '"DotGothic16","Hiragino Kaku Gothic ProN","Yu Gothic",monospace';
 const KEY = 'imo-v2', OLD = 'imo-proto1-v1';
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+/* 数字の3けたごとの「,」は、作っておいた1つの NumberFormat で（toLocaleString は毎回作りなおすので重い。出る文字は同じ・ver 2.7）。fmt より前に要る */
+const NF = new Intl.NumberFormat('ja-JP');
 const UNITS = [[1e68,'無量大数'],[1e64,'不可思議'],[1e60,'那由他'],[1e56,'阿僧祇'],[1e52,'恒河沙'],[1e48,'極'],[1e44,'載'],[1e40,'正'],[1e36,'澗'],[1e32,'溝'],[1e28,'穣'],[1e24,'秭'],[1e20,'垓'],[1e16,'京'],[1e12,'兆'],[1e8,'億'],[1e4,'万']];
 
 /* ---------- いも ---------- */

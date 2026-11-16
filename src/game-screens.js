@@ -122,7 +122,9 @@ document.addEventListener('keydown', e => {
   else if (!$('menuModal').hidden) $('menuModal').hidden = true;
   else if (openDr) closeDrawers();
 });
-const paused = () => titleOn || !!openDr || !$('cardModal').hidden || !$('helpModal').hidden || !$('menuModal').hidden || !$('achModal').hidden || !$('awayModal').hidden || !$('presModal').hidden;
+/* 1コマに何回もよぶので、窓の部品は先にさがしておく（ver 2.7） */
+const PAUSE_EL = ['cardModal', 'helpModal', 'menuModal', 'achModal', 'awayModal', 'presModal'].map($);
+const paused = () => titleOn || !!openDr || PAUSE_EL.some(e => !e.hidden);
 cv.addEventListener('pointerdown', e => { ensureAudio(); if (paused()) return; tapAt(e.clientX/A, e.clientY/A); });
 let hiddenAt = 0;
 document.addEventListener('visibilitychange', () => {

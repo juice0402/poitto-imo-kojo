@@ -64,11 +64,12 @@ function earn(v){ S.coins += v; S.stats.earned += v; S.stats.earnedRun += v; }
 /* ---------- 数字 ---------- */
 function fmt(n){
   n = Math.floor(Math.max(0, n));
-  if (n < 1e4) return n.toLocaleString('ja-JP');
+  if (n < 1e4) return NF.format(n);
   if (!isFinite(n)) return '∞';
-  if (n >= 1e136) return n.toExponential(2).replace('e+', '×10^');
+  /* 無量大数の上は「〇万無量大数」まで。1億無量大数（10^76）からは ×10^（企画メモのとおり・ver 2.7） */
+  if (n >= 1e76) return n.toExponential(2).replace('e+', '×10^');
   if (n >= 1e72) return fmt(n/1e68) + '無量大数';
-  for (const [v, u] of UNITS) if (n >= v){ const x = n/v; let s = x < 10 ? x.toFixed(2) : x < 100 ? x.toFixed(1) : Math.floor(x).toLocaleString('ja-JP'); if (s.includes('.')) s = s.replace(/0+$/, '').replace(/\.$/, ''); return s + u; }
+  for (const [v, u] of UNITS) if (n >= v){ const x = n/v; let s = x < 10 ? x.toFixed(2) : x < 100 ? x.toFixed(1) : NF.format(Math.floor(x)); if (s.includes('.')) s = s.replace(/0+$/, '').replace(/\.$/, ''); return s + u; }
   return String(n);
 }
 function fmtR(n){ if (n < 10){ const s = (Math.round(n*10)/10).toFixed(1); return s.endsWith('.0') ? s.slice(0, -2) : s; } return fmt(n); }
