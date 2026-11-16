@@ -1,0 +1,160 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>ぽいっと！いも工場</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap">
+<style>
+@@include style.css
+</style>
+
+<canvas id="cv" aria-label="ベルトコンベアー。わる芋とレア芋をタップ"></canvas>
+<div class="probe" id="probeB"></div>
+
+<header class="hud">
+  <div class="hud-row">
+    <div class="wallet" id="wallet">
+      <img class="pi" id="walletCoin" data-icon="coin" alt="">
+      <div class="wnum"><div class="amt"><b id="coins">0</b><span class="yen">円</span></div><span class="rate" id="rate">毎秒 +0円</span></div>
+    </div>
+    <div class="hbtns">
+      <button class="sq pix" id="achBtn" type="button" aria-label="実績"><span class="badge pix fine flat" id="achBadge" hidden>0</span><img class="pi" data-icon="trophy" alt=""></button>
+      <button class="sq pix" id="menuBtn" type="button" aria-label="メニュー"><img class="pi" data-icon="gear" alt=""></button>
+    </div>
+  </div>
+  <button class="qnote pix" id="questTab" type="button" aria-expanded="false"><span class="qhead"><span class="qtl"><i class="chev"></i>めあて</span><span class="q2"><span class="qtbar"><i id="qTabFill"></i></span></span></span><span class="qbody" id="quest"><span id="qText">芋を10こ出荷する</span><span class="q2"><span class="qbar"><i id="qFill"></i></span><span id="qProg">0/10</span><span id="qRew"></span></span></span><span class="qsp" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></button>
+  <div class="fever pix gold" id="fever" hidden><span id="feverName">フィーバー！</span> <b id="feverM">5</b>倍 あと <b id="feverT">20</b>秒</div>
+</header>
+<div class="toast pix" id="toast" role="status" aria-live="polite"></div>
+<div class="achpop pix gold" id="achPop" role="status" aria-live="polite"><img class="pi" data-icon="trophy" alt=""><div><small>実績かいじょ！</small><b id="achPopName"></b></div></div>
+<button class="rpop pix" id="rarePop" type="button" aria-live="polite"><img class="pi" id="rpImg" alt=""><span class="rpt"><small id="rpStar"></small><b id="rpName"></b></span><span class="rpnew pix fine flat" id="rpNew">NEW</span><span class="rpn" id="rpN"></span></button>
+
+<nav class="dock" aria-label="工場と図鑑">
+  <button class="dbtn pix" id="zukanBtn" type="button" aria-expanded="false" aria-controls="zukanDrawer"><img class="pi" data-icon="book" alt=""><span class="dl">図鑑</span><span class="znew pix fine flat" id="zukanNew" hidden>NEW</span></button>
+  <button class="dbtn pix" id="shopBtn" type="button" aria-expanded="false" aria-controls="shopDrawer"><span class="badge pix fine flat" id="shopBadge" hidden>0</span><img class="pi" data-icon="factory" alt=""><span class="dl">工場</span></button>
+</nav>
+
+<div class="tip pix gold" id="shopTip" hidden>工場でパートさんをやとおう</div>
+
+<div class="scrim" id="scrim"></div>
+
+<aside class="drawer right pix" tabindex="-1" id="shopDrawer" aria-label="工場" aria-hidden="true" inert>
+  <div class="dh"><img class="pi" data-icon="factory" alt=""><h2>工場</h2><button class="x pix fine" id="shopClose" type="button" aria-label="とじる"><img class="pi" data-icon="close" alt=""></button></div>
+  <div class="dwallet pix fine flat"><img class="pi" data-icon="coin" alt=""><b id="shopCoins">0</b><span>円</span><span id="shopRate">毎秒 +0円</span></div>
+  <div class="tabs" id="shopTabs" role="group" aria-label="工場のページ"><button type="button" class="pix fine flat" data-t="f">施設と改良</button><button type="button" class="pix fine flat" data-t="s">転生<span class="tdot" id="seedDot" hidden></span></button></div>
+  <div class="dbody" id="shopBody">
+    <section class="sec"><div class="sechead"><h3>施設</h3><div class="seg" id="buySeg" role="group" aria-label="まとめ買い"><button type="button" class="pix fine flat" data-n="1">×1</button><button type="button" class="pix fine flat" data-n="10">×10</button><button type="button" class="pix fine flat" data-n="100">×100</button></div></div><div class="blist" id="bldList"></div></section>
+    <section class="sec"><div class="sechead"><h3>改良 <small id="upgCount"></small></h3></div><div class="ugrid" id="upgGrid"></div><button type="button" class="pix fine flat morebtn" id="upgMore" hidden></button><div class="udetail pix fine flat" id="upgDetail" hidden></div></section>
+    <section class="sec"><h3>きろく</h3><div class="stats" id="stats"></div></section>
+  </div>
+  <div class="dbody" id="seedBody" hidden>
+    <div class="seedcard v2 pix fine flat" id="seedCard"></div>
+    <section class="sec"><h3>工場をたたむ</h3><div class="pres pix fine flat" id="presBox"></div></section>
+    <section class="sec"><h3>種の改良 <small id="perkCount"></small></h3><p class="perknote" id="perkNote" hidden>種は使っても、生産アップはへらないよ</p><div class="blist" id="perkList"></div></section>
+  </div>
+</aside>
+
+<aside class="drawer left pix" tabindex="-1" id="zukanDrawer" aria-label="いも図鑑" aria-hidden="true" inert>
+  <div class="dh"><img class="pi" data-icon="book" alt=""><h2>図鑑<b id="zkCount">0/19</b></h2><button class="x pix fine" id="zukanClose" type="button" aria-label="とじる"><img class="pi" data-icon="close" alt=""></button></div>
+  <div class="zinfo"><span>図鑑ボーナス 生産 <b>+<span id="zkBonus">0</span>%</b></span><span class="zbar"><i id="zkFill"></i></span></div>
+  <div class="tabs" id="zkTabs" role="group" aria-label="しゅるい"><button type="button" class="pix fine flat" data-c="rare">レア</button><button type="button" class="pix fine flat" data-c="good">ふつう</button><button type="button" class="pix fine flat" data-c="bad">わる</button></div>
+  <div class="dbody"><div class="zgrid" id="zkGrid"></div></div>
+</aside>
+
+<div class="modal" id="cardModal" hidden>
+  <div class="mpanel card pix" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="cardName">
+    <div class="band" id="cardBand"></div>
+    <span class="newb pix gold fine flat" id="cardBadge">はじめて見つけた！</span>
+    <span class="cimg pix fine flat"><img class="pi" id="cardImg" alt=""></span>
+    <h2 id="cardName">ハートいも</h2>
+    <div class="stars" id="cardStars"></div>
+    <span class="chip pix fine flat" id="cardCat"></span>
+    <p id="cardDesc"></p>
+    <div class="meta" id="cardMeta"></div>
+    <button class="pix gold big" id="cardClose" type="button">つづける</button>
+  </div>
+</div>
+
+<div class="modal" id="helpModal" hidden>
+  <div class="mpanel pix tall" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <h2 id="helpTitle">あそびかた</h2>
+    <div class="hrows">
+      <div class="hrow pix fine flat"><span class="hi"><img class="pi" data-pot="futsu" alt=""></span><div><b>ふつうの芋</b><span>そのまま流すと出荷されて、お金になる</span></div></div>
+      <div class="hrow pix fine flat"><span class="hi"><img class="pi" data-pot="me" alt=""></span><div><b>わる芋（芽・くさり・石）</b><span>タップでポイッ。出荷するとクレームでお金がへる</span></div></div>
+      <div class="hrow pix fine flat"><span class="hi"><img class="pi" data-pot="heart" alt=""></span><div><b>キラキラはレア芋</b><span>タップでゲット。金と虹の芋はフィーバー！</span></div></div>
+      <div class="hrow pix fine flat"><span class="hi"><img class="pi" data-icon="factory" alt=""></span><div><b>工場をそだてる</b><span>施設を建てると、自動で選別してくれて、毎秒お金が入る</span></div></div>
+      <div class="hrow pix fine flat"><span class="hi"><img class="pi" data-icon="trophy" alt=""></span><div><b>実績をあつめる</b><span>1つにつき生産 +1%。留守のあいだも少しかせぐよ</span></div></div>
+      <div class="hrow pix fine flat"><span class="hi"><img class="pi" data-icon="seed" alt=""></span><div><b>転生する</b><span>たくさんかせいだら工場をたたんで「いもの種」に。ずっと生産アップ</span></div></div>
+    </div>
+    <button class="pix gold big" id="helpClose" type="button">はじめる</button>
+  </div>
+</div>
+
+<div class="modal" id="achModal" hidden>
+  <div class="mpanel pix tall" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="achTitle">
+    <h2 id="achTitle">実績</h2>
+    <div class="meta"><span id="achCount">0</span></div>
+    <div class="meta">実績ボーナス 生産 <b class="asum">+<span id="achBonus">0</span>%</b><span id="achCat"></span></div>
+    <div class="tabs" id="achTabs" role="group" aria-label="実績のしぼりこみ"><button type="button" class="pix fine flat" data-a="todo">まだ</button><button type="button" class="pix fine flat" data-a="got">とった</button><button type="button" class="pix fine flat" data-a="all">すべて</button></div>
+    <div class="alist" id="achList"></div>
+    <button class="pix gold big" id="achClose" type="button">とじる</button>
+  </div>
+</div>
+
+<div class="modal" id="presModal" hidden>
+  <div class="mpanel pix" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="presTitle">
+    <h2 id="presTitle">工場をたたむ？</h2>
+    <p>新しい土地で、いも工場をはじめからつくりなおすよ。</p>
+    <div class="awayamt"><img class="pi" data-icon="seed" data-s="2" alt=""><span id="presAmt">+0</span></div>
+    <div class="meta" id="presMeta">種ボーナスは ずっと続くよ</div>
+    <div class="keep"><b>のこる</b><span>図鑑・実績・いもの種・種の改良・めあて・きろく</span><b class="lose">なくなる</b><span>お金・施設・改良</span></div>
+    <div class="two"><button class="pix danger" id="presYes" type="button">たたむ</button><button class="pix fine" id="presNo" type="button">やめる</button></div>
+  </div>
+</div>
+<div class="flash" id="flash"></div>
+
+<div class="modal" id="awayModal" hidden>
+  <div class="mpanel pix" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="awayTitle">
+    <h2 id="awayTitle">留守のあいだに</h2>
+    <div class="awayamt"><img class="pi" data-icon="coin" data-s="2" alt=""><span id="awayAmt">+0円</span></div>
+    <button class="pix gold big" id="awayOk" type="button">うけとる</button>
+  </div>
+</div>
+
+<div class="modal" id="menuModal" hidden>
+  <div class="mpanel pix tall" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="menuTitle">
+    <h2 id="menuTitle">メニュー</h2>
+    <div class="mscroll">
+    <button class="mrow pix fine" id="bgmToggle" type="button" aria-pressed="true"><img class="pi" id="bgmIco" alt="">BGM<b id="bgmState">オン</b></button>
+    <button class="mrow pix fine" id="sndToggle" type="button" aria-pressed="true"><img class="pi" id="sndIco" alt="">効果音<b id="sndState">オン</b></button>
+    <button class="mrow pix fine" id="helpOpen" type="button"><img class="pi" data-icon="book" alt="">あそびかた</button>
+    <div class="mstats" id="mStats"></div>
+    <div id="resetRow"></div>
+    </div>
+    <button class="pix gold big" id="menuClose" type="button">とじる</button>
+  </div>
+</div>
+
+<div class="title" id="title" tabindex="0" role="button" aria-label="タップしてはじめる">
+  <div class="logo"><span class="l1">ぽいっと！</span><span class="l2">いも工場</span></div>
+  <div class="tpots" id="tpots"></div>
+  <p class="tap">タップしてはじめる</p>
+  <p class="tver">ver 2.6</p>
+</div>
+
+<script>
+@@include art-imo.js
+@@include art-imo70.js
+@@include art-icons.js
+
+</script>
+<script>
+@@include game-data.js
+@@include game-core.js
+@@include game-belt.js
+@@include game-ui.js
+@@include game-screens.js
+
+</script>
+
+</body></html>

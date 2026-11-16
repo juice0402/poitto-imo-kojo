@@ -1,0 +1,9 @@
+{
+  "name": "poitto-imo-kojo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "test": "node tools/build.mjs --check"
+  }
+}
