@@ -233,7 +233,8 @@ const UI = Object.fromEntries(UPG.map(u => [u.id, u]));
 
 const GOALS = [
   {t:'芋を10こ出荷する',            n:10,  v:() => S.stats.shipped, r:10},
-  {t:'わる芋を5こポイッする',        n:5,   v:() => S.stats.flicked, r:10},
+  /* パートさんたちが自動ではじいたぶん（stats.auto）も数える（v1.1：先にパートさんをやとうと、わる芋をとられて進まなくなった） */
+  {t:'わる芋を5こポイッする',        n:5,   v:() => S.stats.flicked + S.stats.auto, r:10},
   {t:'パートさんを1人やとう',        n:1,   v:() => S.bld.part, r:15},
   {t:'レア芋を1つ見つける',          n:1,   v:() => S.stats.rares, r:20},
   {t:'改良を1つ買う',                n:1,   v:() => S.stats.upgs, r:30},
