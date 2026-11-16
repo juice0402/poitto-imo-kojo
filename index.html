@@ -2059,7 +2059,8 @@ let tutPot = null, tutSpawnN = 0;
 function warm(){ return Math.min(1, Math.sqrt(Math.max(0, S.stats.earned)/1000)); }
 function spawn(){
   let kind = pickKind();
-  if (!titleOn && !(S.tut & 1) && !tutPot && ++tutSpawnN >= 3) kind = 'me';
+  /* チュートリアル：はじめは ふつう芋2つ → 3つ目にわる芋（ポイッの練習）。それが済むまで、レア芋やほかのわる芋は出さない（ver 2.7：初手にレア芋が出て、レアの説明が先になることがあった） */
+  if (!titleOn && !(S.tut & 1)){ if (!tutPot && ++tutSpawnN >= 3) kind = 'me'; else if (KINDS[kind].cat !== 'good') kind = pickW(GOOD_W); }
   const p = newPot(kind, 0, 0), cat = KINDS[kind].cat;
   if (!titleOn && !tutPot && ((cat === 'bad' && !(S.tut & 1)) || (cat === 'rare' && !(S.tut & 2)))){ p.tut = cat; tutPot = p; }
   p.y = -p.h/2 - 1;
