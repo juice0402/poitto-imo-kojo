@@ -223,7 +223,7 @@ UPG.push(
   {id:'farm4', name:'星ふる畑と契約',     icon:'map',    tier:4, cost:5e11, desc:'星ふる畑の芋が流れてくる（4しゅるい）',   unlock:() => S.upg.farm3 && S.perk.hoshi},
   {id:'tap6',  name:'ポイッの伝説',       icon:'gglove', tier:4, cost:5e11, desc:'ポイッで、毎秒の8%分もさらにもらえる',   unlock:() => S.stats.flicked >= 1500},
   {id:'boss',  name:'工場長の帽子',       icon:'trophy', tier:1, cost:1e12, desc:'実績ボーナスが1つ +2% になる',           unlock:() => achCount() >= 30},
-  {id:'zk2',   name:'いも図鑑・下巻',     icon:'book',   tier:2, cost:1e13, desc:'図鑑ボーナスが1しゅるい +4% になる',     unlock:() => foundCount() >= 30},
+  {id:'zk2',   name:'いも図鑑・下巻',     icon:'book',   tier:2, cost:1e13, desc:'図鑑ボーナスが1しゅるい +4% になる',     unlock:() => S.upg.zk1 && foundCount() >= 30},
 );
 const FARM_DEALS = [[5, 1e15, 'ougon'], [6, 1e18, 'houseki'], [7, 1e21, 'okashi'], [8, 1e25, 'doubutsu'], [9, 1e30, 'uchu'], [10, 1e36, 'karakuri'], [11, 1e43, 'densetsu']];
 for (const [f, cost, pk] of FARM_DEALS) UPG.push({id:'farm' + f, name:`${FARMS[f]}と契約`, icon:'map', tier:Math.min(6, f - 2), cost, desc:`${FARMS[f]}の芋が流れてくる（10しゅるい）`, unlock:() => S.upg['farm' + (f - 1)] && S.perk[pk]});

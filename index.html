@@ -289,6 +289,9 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
 .flow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:4px}
 .flow>div{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;text-align:center;line-height:1.25;font-size:14px;color:var(--ink)}
 .flow>i{font-style:normal;color:var(--leaf-d)}
+.flow>div span{white-space:nowrap}
+/* せまい画面（320pxくらい）：3コマの「生産アップ」が「生産アッ／プ」と切れないように、字を少し小さく。「データを消して、さいしょから」も1行に（ver 2.7） */
+@media (max-width:350px){.flow>div{font-size:12px}#resetRow .mrow{font-size:14px}}
 .sline{display:flex;align-items:baseline;gap:6px;padding-top:10px;box-shadow:inset 0 var(--ux) 0 0 #bfe0a4;flex-wrap:wrap}
 .sline b{font-size:32px}
 .sline em{margin-left:auto;font-size:16px;white-space:nowrap}
@@ -485,7 +488,7 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
   <div class="logo"><span class="l1">ぽいっと！</span><span class="l2">いも工場</span></div>
   <div class="tpots" id="tpots"></div>
   <p class="tap">タップしてはじめる</p>
-  <p class="tver">ver 2.6</p>
+  <p class="tver">ver 2.7</p>
 </div>
 
 <script>
@@ -1546,7 +1549,7 @@ UPG.push(
   {id:'farm4', name:'星ふる畑と契約',     icon:'map',    tier:4, cost:5e11, desc:'星ふる畑の芋が流れてくる（4しゅるい）',   unlock:() => S.upg.farm3 && S.perk.hoshi},
   {id:'tap6',  name:'ポイッの伝説',       icon:'gglove', tier:4, cost:5e11, desc:'ポイッで、毎秒の8%分もさらにもらえる',   unlock:() => S.stats.flicked >= 1500},
   {id:'boss',  name:'工場長の帽子',       icon:'trophy', tier:1, cost:1e12, desc:'実績ボーナスが1つ +2% になる',           unlock:() => achCount() >= 30},
-  {id:'zk2',   name:'いも図鑑・下巻',     icon:'book',   tier:2, cost:1e13, desc:'図鑑ボーナスが1しゅるい +4% になる',     unlock:() => foundCount() >= 30},
+  {id:'zk2',   name:'いも図鑑・下巻',     icon:'book',   tier:2, cost:1e13, desc:'図鑑ボーナスが1しゅるい +4% になる',     unlock:() => S.upg.zk1 && foundCount() >= 30},
 );
 const FARM_DEALS = [[5, 1e15, 'ougon'], [6, 1e18, 'houseki'], [7, 1e21, 'okashi'], [8, 1e25, 'doubutsu'], [9, 1e30, 'uchu'], [10, 1e36, 'karakuri'], [11, 1e43, 'densetsu']];
 for (const [f, cost, pk] of FARM_DEALS) UPG.push({id:'farm' + f, name:`${FARMS[f]}と契約`, icon:'map', tier:Math.min(6, f - 2), cost, desc:`${FARMS[f]}の芋が流れてくる（10しゅるい）`, unlock:() => S.upg['farm' + (f - 1)] && S.perk[pk]});
@@ -1799,7 +1802,8 @@ function recalc(){
   D.interval = Math.max(.5, 1.6*Math.pow(.93, S.bld.hatake));
   D.feverDur = 20 + (S.upg.fever1 ? 10 : 0) + (S.perk.matsuri ? 10 : 0) + (S.perk.matsuri2 ? 20 : 0);
   D.feverMul = S.upg.fever2 ? 7 : 5;
-  D.lineRate = Math.max(0, 1 - BAD_RATE - D.rareChance)/(D.interval*(1.4 - .4*warm()))*D.linePrice;
+  /* ふつう芋の割合は、レアでない（1-レア）× わるでない（1-わる）。芋の決め方 pickKind と同じ（ver 2.7） */
+  D.lineRate = (1 - D.rareChance)*(1 - BAD_RATE)/(D.interval*(1.4 - .4*warm()))*D.linePrice;
   D.rate = D.cps + D.lineRate;
 }
 let feverM = 5;
@@ -1841,7 +1845,10 @@ function resize(){
   root.style.setProperty('--px', A + 'px');
   root.style.setProperty('--ux', Math.max(1, Math.round(DPR*A*2/3))/DPR + 'px');
   SAFE_B = Math.ceil(($('probeB').offsetHeight || 0)/A);
+  const oldGate = G.gateY;
   layout(); buildStatic();
+  /* 画面の大きさが変わったら（スマホのアドレスバー・向き）、ベルトの上の芋も同じ割合で動かす。そのままだと出口より下になった芋が、すぐ出荷（わる芋ならクレーム）になっていた（ver 2.7） */
+  if (inited && oldGate > 0 && oldGate !== G.gateY){ const k = G.gateY/oldGate; for (const p of pots){ p.y *= k; p.x = clamp(p.x, G.ix0 + p.w/2 + 1, G.ix1 - p.w/2 - 1); } }
   if (scaleChanged && inited) refreshImages();
   cachePos(); requestAnimationFrame(cachePos);
 }
@@ -2389,16 +2396,30 @@ const fitAll = () => ['bldList', 'perkList', 'upgDetail', 'zkGrid', 'achList'].f
 window.addEventListener('resize', fitAll); if (document.fonts) document.fonts.ready.then(fitAll);
 
 let disp = 0, shownC = -1, shownS = '', shownR = '', rateT = 0, affT = 0;
+/* 上のお金と毎秒：右のボタンにかからないように字をちぢめる（お金 32→24→20→16px・毎秒 16→14→12px）。数字の形（けた・単位）が変わったときだけ測る（ver 2.7）。
+   工場の中のお金は広いので、いままでどおり長さで決める */
+const wnumEl = coinsEl.closest('.wnum'); let coinShape = '', rateShape = '';
+const hudFits = () => wnumEl.scrollWidth <= wnumEl.clientWidth + 1;
+function fitCoins(s){
+  const shape = s.replace(/\d/g, '0'); if (shape === coinShape) return; coinShape = shape;
+  const sfs = s.length > 9 ? '20px' : s.length > 7 ? '24px' : ''; if (shopCoinsEl.style.fontSize !== sfs) shopCoinsEl.style.fontSize = sfs;
+  coinsEl.style.fontSize = ''; for (const fs of ['24px', '20px', '16px']){ if (hudFits()) break; coinsEl.style.fontSize = fs; }
+}
+function fitRate(r){
+  const shape = r.replace(/\d/g, '0'); if (shape === rateShape) return; rateShape = shape;
+  rateEl.style.fontSize = ''; for (const fs of ['14px', '12px']){ if (hudFits()) break; rateEl.style.fontSize = fs; }
+}
+window.addEventListener('resize', () => { coinShape = rateShape = ''; fitCoins(shownS); fitRate(shownR); });
 function hudTick(dt){
   const diff = S.coins - disp; disp = Math.abs(diff) < .5 ? S.coins : disp + diff*Math.min(1, dt*10);
   /* 文字が変わったときだけ書きかえる（「1.23兆」のままなら画面はさわらない・ver 2.7） */
-  const c = Math.floor(disp); if (c !== shownC){ shownC = c; const s = fmt(c); if (s !== shownS){ shownS = s; coinsEl.textContent = s; shopCoinsEl.textContent = s; const fs = s.length > 9 ? '20px' : s.length > 7 ? '24px' : ''; if (coinsEl.style.fontSize !== fs){ coinsEl.style.fontSize = fs; shopCoinsEl.style.fontSize = fs; } } }
+  const c = Math.floor(disp); if (c !== shownC){ shownC = c; const s = fmt(c); if (s !== shownS){ shownS = s; coinsEl.textContent = s; shopCoinsEl.textContent = s; fitCoins(s); } }
   rateT += dt;
   if (paused()) calmT = .5; else if (calmT > 0) calmT -= dt;
   if (qDoneQ.length && noticeOk()) checkGoal();
   if (achQ.length) showAchPop();
   if (rpTimer && openDr) hideRarePop();
-  if (rateT > .25){ rateT = 0; const r = '毎秒 +' + fmtR(D.rate*F()) + '円'; if (r !== shownR){ shownR = r; rateEl.textContent = r; shopRateEl.textContent = r; } if (feverT > 0) $('feverT').textContent = Math.ceil(feverT); }
+  if (rateT > .25){ rateT = 0; const r = '毎秒 +' + fmtR(D.rate*F()) + '円'; if (r !== shownR){ shownR = r; rateEl.textContent = r; shopRateEl.textContent = r; fitRate(r); } if (feverT > 0) $('feverT').textContent = Math.ceil(feverT); }
   if (questT > 0 && !paused()){ questT -= dt; if (questT <= 0) questHide(); }
   affT += dt; if (affT > .2){ affT = 0; updateAfford();
     if (!(S.tut & 4) && S.bld.part > 0){ S.tut |= 4; save(); }
@@ -2461,11 +2482,13 @@ function showRarePop(kind, first){
   $('rpName').textContent = k.name;
   $('rpNew').hidden = !first; $('rpN').textContent = first ? '' : '×' + fmt(S.found[kind] || 0);
   rpKind = kind; rpFirst = first;
-  if (achPopT){ clearTimeout(achPopT); achPopT = 0; $('achPop').classList.remove('show'); if (achCur){ achQ.unshift(achCur); achCur = null; } }
+  holdAchPop();
   $('rarePop').classList.add('show');
   clearTimeout(rpTimer); rpTimer = setTimeout(hideRarePop, first ? 3500 : 2200);
 }
 function hideRarePop(){ clearTimeout(rpTimer); rpTimer = 0; $('rarePop').classList.remove('show'); }
+/* 出ている実績のお知らせを引っこめて、あとでもう一度出す（レア芋の小窓・引き出しを開いたとき。ver 2.7：引き出しのときは名前が消えたままだった） */
+function holdAchPop(){ if (!achPopT) return; clearTimeout(achPopT); achPopT = 0; $('achPop').classList.remove('show'); if (achCur){ achQ.unshift(achCur); achCur = null; } }
 $('rarePop').addEventListener('click', () => { if (!rpKind) return; ensureAudio(); SFX.sel(); const k = rpKind, f = rpFirst; hideRarePop(); openCard(k, f); });
 function renderAchBadge(){ const b = $('achBadge'); b.textContent = S.achNew > 99 ? '99+' : S.achNew; b.hidden = !S.achNew; }
 function checkAch(){
@@ -2741,7 +2764,7 @@ let openDr = null;
 const DR = {shop:[$('shopDrawer'), $('shopBtn')], zukan:[$('zukanDrawer'), $('zukanBtn')]};
 function openDrawer(name){
   closeDrawers(true);
-  $('toast').classList.remove('show'); $('achPop').classList.remove('show'); hideRarePop();
+  $('toast').classList.remove('show'); holdAchPop(); $('achPop').classList.remove('show'); hideRarePop();
   const [dr, btn] = DR[name];
   openDr = name;
   if (name === 'shop') setShopTab(shopTab); else { if (S.znew.length && !S.znew.some(k => KINDS[k].cat === zkTab)) zkTab = KINDS[S.znew[0]].cat; renderZukan(); }
@@ -2823,6 +2846,8 @@ $('resetRow').addEventListener('click', e => {
   if (e.target.closest('#resetYes')){
     const snd = S.sound, bgm = S.bgm; S = DEF(); S.sound = snd; S.bgm = bgm; S.seenHelp = true; feverM = 5; BGM.fever(false);
     pots = []; flies = []; parts = []; coinsFly = []; texts = []; feverT = 0; tutPot = null; tutSpawnN = 0; $('fever').hidden = true; disp = 0; selUpg = null; lastBadge = -1;
+    /* 前のデータのお知らせ（めあて達成・実績・レア芋）がのこらないように（ver 2.7） */
+    holdAchPop(); hideRarePop(); qDoneQ.length = 0; qHold = 0; qKey = ''; $('achPop').classList.remove('show');
     awayPend = null; achQ.length = 0; feverLv = 0; upgOpen = false; for (const k in ST) ST[k].t = 0; recalc(); save(); renderDock(); renderAchBadge(); checkGoal(); $('menuModal').hidden = true; toast('さいしょからにしたよ');
   }
 });

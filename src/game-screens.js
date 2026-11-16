@@ -27,7 +27,7 @@ let openDr = null;
 const DR = {shop:[$('shopDrawer'), $('shopBtn')], zukan:[$('zukanDrawer'), $('zukanBtn')]};
 function openDrawer(name){
   closeDrawers(true);
-  $('toast').classList.remove('show'); $('achPop').classList.remove('show'); hideRarePop();
+  $('toast').classList.remove('show'); holdAchPop(); $('achPop').classList.remove('show'); hideRarePop();
   const [dr, btn] = DR[name];
   openDr = name;
   if (name === 'shop') setShopTab(shopTab); else { if (S.znew.length && !S.znew.some(k => KINDS[k].cat === zkTab)) zkTab = KINDS[S.znew[0]].cat; renderZukan(); }
@@ -109,6 +109,8 @@ $('resetRow').addEventListener('click', e => {
   if (e.target.closest('#resetYes')){
     const snd = S.sound, bgm = S.bgm; S = DEF(); S.sound = snd; S.bgm = bgm; S.seenHelp = true; feverM = 5; BGM.fever(false);
     pots = []; flies = []; parts = []; coinsFly = []; texts = []; feverT = 0; tutPot = null; tutSpawnN = 0; $('fever').hidden = true; disp = 0; selUpg = null; lastBadge = -1;
+    /* 前のデータのお知らせ（めあて達成・実績・レア芋）がのこらないように（ver 2.7） */
+    holdAchPop(); hideRarePop(); qDoneQ.length = 0; qHold = 0; qKey = ''; $('achPop').classList.remove('show');
     awayPend = null; achQ.length = 0; feverLv = 0; upgOpen = false; for (const k in ST) ST[k].t = 0; recalc(); save(); renderDock(); renderAchBadge(); checkGoal(); $('menuModal').hidden = true; toast('さいしょからにしたよ');
   }
 });

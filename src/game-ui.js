@@ -34,16 +34,30 @@ const fitAll = () => ['bldList', 'perkList', 'upgDetail', 'zkGrid', 'achList'].f
 window.addEventListener('resize', fitAll); if (document.fonts) document.fonts.ready.then(fitAll);
 
 let disp = 0, shownC = -1, shownS = '', shownR = '', rateT = 0, affT = 0;
+/* 上のお金と毎秒：右のボタンにかからないように字をちぢめる（お金 32→24→20→16px・毎秒 16→14→12px）。数字の形（けた・単位）が変わったときだけ測る（ver 2.7）。
+   工場の中のお金は広いので、いままでどおり長さで決める */
+const wnumEl = coinsEl.closest('.wnum'); let coinShape = '', rateShape = '';
+const hudFits = () => wnumEl.scrollWidth <= wnumEl.clientWidth + 1;
+function fitCoins(s){
+  const shape = s.replace(/\d/g, '0'); if (shape === coinShape) return; coinShape = shape;
+  const sfs = s.length > 9 ? '20px' : s.length > 7 ? '24px' : ''; if (shopCoinsEl.style.fontSize !== sfs) shopCoinsEl.style.fontSize = sfs;
+  coinsEl.style.fontSize = ''; for (const fs of ['24px', '20px', '16px']){ if (hudFits()) break; coinsEl.style.fontSize = fs; }
+}
+function fitRate(r){
+  const shape = r.replace(/\d/g, '0'); if (shape === rateShape) return; rateShape = shape;
+  rateEl.style.fontSize = ''; for (const fs of ['14px', '12px']){ if (hudFits()) break; rateEl.style.fontSize = fs; }
+}
+window.addEventListener('resize', () => { coinShape = rateShape = ''; fitCoins(shownS); fitRate(shownR); });
 function hudTick(dt){
   const diff = S.coins - disp; disp = Math.abs(diff) < .5 ? S.coins : disp + diff*Math.min(1, dt*10);
   /* 文字が変わったときだけ書きかえる（「1.23兆」のままなら画面はさわらない・ver 2.7） */
-  const c = Math.floor(disp); if (c !== shownC){ shownC = c; const s = fmt(c); if (s !== shownS){ shownS = s; coinsEl.textContent = s; shopCoinsEl.textContent = s; const fs = s.length > 9 ? '20px' : s.length > 7 ? '24px' : ''; if (coinsEl.style.fontSize !== fs){ coinsEl.style.fontSize = fs; shopCoinsEl.style.fontSize = fs; } } }
+  const c = Math.floor(disp); if (c !== shownC){ shownC = c; const s = fmt(c); if (s !== shownS){ shownS = s; coinsEl.textContent = s; shopCoinsEl.textContent = s; fitCoins(s); } }
   rateT += dt;
   if (paused()) calmT = .5; else if (calmT > 0) calmT -= dt;
   if (qDoneQ.length && noticeOk()) checkGoal();
   if (achQ.length) showAchPop();
   if (rpTimer && openDr) hideRarePop();
-  if (rateT > .25){ rateT = 0; const r = '毎秒 +' + fmtR(D.rate*F()) + '円'; if (r !== shownR){ shownR = r; rateEl.textContent = r; shopRateEl.textContent = r; } if (feverT > 0) $('feverT').textContent = Math.ceil(feverT); }
+  if (rateT > .25){ rateT = 0; const r = '毎秒 +' + fmtR(D.rate*F()) + '円'; if (r !== shownR){ shownR = r; rateEl.textContent = r; shopRateEl.textContent = r; fitRate(r); } if (feverT > 0) $('feverT').textContent = Math.ceil(feverT); }
   if (questT > 0 && !paused()){ questT -= dt; if (questT <= 0) questHide(); }
   affT += dt; if (affT > .2){ affT = 0; updateAfford();
     if (!(S.tut & 4) && S.bld.part > 0){ S.tut |= 4; save(); }
@@ -106,11 +120,13 @@ function showRarePop(kind, first){
   $('rpName').textContent = k.name;
   $('rpNew').hidden = !first; $('rpN').textContent = first ? '' : '×' + fmt(S.found[kind] || 0);
   rpKind = kind; rpFirst = first;
-  if (achPopT){ clearTimeout(achPopT); achPopT = 0; $('achPop').classList.remove('show'); if (achCur){ achQ.unshift(achCur); achCur = null; } }
+  holdAchPop();
   $('rarePop').classList.add('show');
   clearTimeout(rpTimer); rpTimer = setTimeout(hideRarePop, first ? 3500 : 2200);
 }
 function hideRarePop(){ clearTimeout(rpTimer); rpTimer = 0; $('rarePop').classList.remove('show'); }
+/* 出ている実績のお知らせを引っこめて、あとでもう一度出す（レア芋の小窓・引き出しを開いたとき。ver 2.7：引き出しのときは名前が消えたままだった） */
+function holdAchPop(){ if (!achPopT) return; clearTimeout(achPopT); achPopT = 0; $('achPop').classList.remove('show'); if (achCur){ achQ.unshift(achCur); achCur = null; } }
 $('rarePop').addEventListener('click', () => { if (!rpKind) return; ensureAudio(); SFX.sel(); const k = rpKind, f = rpFirst; hideRarePop(); openCard(k, f); });
 function renderAchBadge(){ const b = $('achBadge'); b.textContent = S.achNew > 99 ? '99+' : S.achNew; b.hidden = !S.achNew; }
 function checkAch(){

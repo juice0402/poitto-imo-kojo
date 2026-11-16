@@ -282,6 +282,9 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
 .flow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:4px}
 .flow>div{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;text-align:center;line-height:1.25;font-size:14px;color:var(--ink)}
 .flow>i{font-style:normal;color:var(--leaf-d)}
+.flow>div span{white-space:nowrap}
+/* せまい画面（320pxくらい）：3コマの「生産アップ」が「生産アッ／プ」と切れないように、字を少し小さく。「データを消して、さいしょから」も1行に（ver 2.7） */
+@media (max-width:350px){.flow>div{font-size:12px}#resetRow .mrow{font-size:14px}}
 .sline{display:flex;align-items:baseline;gap:6px;padding-top:10px;box-shadow:inset 0 var(--ux) 0 0 #bfe0a4;flex-wrap:wrap}
 .sline b{font-size:32px}
 .sline em{margin-left:auto;font-size:16px;white-space:nowrap}

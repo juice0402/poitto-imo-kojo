@@ -15,7 +15,7 @@
   - game-data.js：いも KINDS（109）・FARMS・GOOD_W/RARE_W・BAD_RATE・RARE_SEC／施設 BLD（20）・TIERS・UPG・FARM_DEALS・CATS・GOALS（めあて）／転生 PRES_MIN・PERKS・applyPerk／実績 ACH
   - game-core.js：状態 DEF・merge（古いセーブの補い）・load・save（セーブ名 imo-v2）／計算 recalc（D.cps・D.interval・D.lineRate）・earn／数字 fmt・fmtR・fmtTime／画面の大きさ resize・layout・buildStatic／pix・img（ドット絵を部品に）／音 SFX・BGM
   - game-belt.js：ベルトの上 warm（はじめのゆっくり）・spawn・tapAt・ship・startFever・beltTick・fxTick・econTick／描く drawBelt・drawPot・drawStations・draw
-  - game-ui.js：toast・alignRows・fitText・hudTick（お知らせの順番・calmT）・setQuest・checkGoal／実績 checkAch・renderAch／留守 calcAway・showAway／工場 renderShop・bldRow・buyBld・buyUpg／転生 renderSeed・doPrestige
+  - game-ui.js：toast・alignRows・fitText・hudTick（お知らせの順番・calmT）・fitCoins/fitRate（上のお金・毎秒をボタンにかからない大きさに）・setQuest・checkGoal・holdAchPop／実績 checkAch・renderAch／留守 calcAway・showAway／工場 renderShop・bldRow・buyBld・buyUpg／転生 renderSeed・doPrestige
   - game-screens.js：図鑑 renderZukan／引き出し openDrawer・closeDrawers／カード・メニュー openCard・openMenu／タイトル startGame／はじまり frame・start
 - 1つの .js は500行くらいまで。大きくなったら、節（`/* ---------- 〇〇 ---------- */`）の切れ目で分けて、shell.html に「@@include」を足す
 

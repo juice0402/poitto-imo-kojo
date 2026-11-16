@@ -52,7 +52,8 @@ function recalc(){
   D.interval = Math.max(.5, 1.6*Math.pow(.93, S.bld.hatake));
   D.feverDur = 20 + (S.upg.fever1 ? 10 : 0) + (S.perk.matsuri ? 10 : 0) + (S.perk.matsuri2 ? 20 : 0);
   D.feverMul = S.upg.fever2 ? 7 : 5;
-  D.lineRate = Math.max(0, 1 - BAD_RATE - D.rareChance)/(D.interval*(1.4 - .4*warm()))*D.linePrice;
+  /* ふつう芋の割合は、レアでない（1-レア）× わるでない（1-わる）。芋の決め方 pickKind と同じ（ver 2.7） */
+  D.lineRate = (1 - D.rareChance)*(1 - BAD_RATE)/(D.interval*(1.4 - .4*warm()))*D.linePrice;
   D.rate = D.cps + D.lineRate;
 }
 let feverM = 5;
@@ -94,7 +95,10 @@ function resize(){
   root.style.setProperty('--px', A + 'px');
   root.style.setProperty('--ux', Math.max(1, Math.round(DPR*A*2/3))/DPR + 'px');
   SAFE_B = Math.ceil(($('probeB').offsetHeight || 0)/A);
+  const oldGate = G.gateY;
   layout(); buildStatic();
+  /* 画面の大きさが変わったら（スマホのアドレスバー・向き）、ベルトの上の芋も同じ割合で動かす。そのままだと出口より下になった芋が、すぐ出荷（わる芋ならクレーム）になっていた（ver 2.7） */
+  if (inited && oldGate > 0 && oldGate !== G.gateY){ const k = G.gateY/oldGate; for (const p of pots){ p.y *= k; p.x = clamp(p.x, G.ix0 + p.w/2 + 1, G.ix1 - p.w/2 - 1); } }
   if (scaleChanged && inited) refreshImages();
   cachePos(); requestAnimationFrame(cachePos);
 }
