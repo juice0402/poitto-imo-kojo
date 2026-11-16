@@ -174,6 +174,7 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
 .sechead h3{flex:1}
 .jump{min-height:44px;padding:4px 12px;flex:none;align-self:stretch}
 .minib{min-height:36px;padding:0 10px;white-space:nowrap;--bg:var(--leaf);--h2:var(--leaf-hi);--l2:var(--leaf-lo)}
+.minib.arm{--bg:var(--gold);--h2:var(--gold-hi);--l2:var(--gold-lo);color:var(--ink);animation:ready 1s steps(1) infinite}
 .minib[aria-disabled="true"]{--bg:var(--cream-2);--h2:var(--hi);--l2:var(--lo);color:var(--ink-2)}
 .morebtn{align-self:center;min-height:40px;padding:0 16px;--bg:var(--cream-2)}
 .blist{display:flex;flex-direction:column;gap:calc(var(--px)*3)}
@@ -436,7 +437,7 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
   <div class="logo"><span class="l1">ぽいっと！</span><span class="l2">いも工場</span></div>
   <div class="tpots" id="tpots"></div>
   <p class="tap">タップしてはじめる</p>
-  <p class="tver">ver 1.7</p>
+  <p class="tver">ver 1.8</p>
 </div>
 
 <script>
@@ -2507,9 +2508,16 @@ function buyUpg(id){
 bldList.addEventListener('click', e => { const r = e.target.closest('.brow[data-b]'); if (r){ ensureAudio(); buyBld(r.dataset.b); } });
 $('upgJump').addEventListener('click', () => { SFX.sel(); upgGrid.scrollIntoView({block:'start', behavior:'smooth'}); });
 $('upgMore').addEventListener('click', () => { upgOpen = !upgOpen; SFX.sel(); renderShop(); });
+/* 「買えるのをぜんぶ」は2回おし：1回目は「〇こ買う？」に変わるだけ（3秒でもどる）。2回目で、そのとき買えるものだけ買う（ver 1.8） */
+let allArm = false, allTimer = 0;
+function disarmAll(){ allArm = false; clearTimeout(allTimer); const b = $('upgAll'); b.classList.remove('arm'); b.textContent = '買えるのをぜんぶ'; }
 $('upgAll').addEventListener('click', () => {
   ensureAudio(); let n = 0;
-  for (;;){ const u = availUpgs().find(x => S.coins >= x.cost); if (!u) break; S.coins -= u.cost; S.upg[u.id] = true; S.stats.upgs++; n++; recalc(); }
+  const can = availUpgs().filter(x => S.coins >= x.cost).sort((a, b) => a.cost - b.cost);
+  if (!can.length){ disarmAll(); toast('いま買える改良はないよ'); SFX.no(); return; }
+  if (!allArm){ allArm = true; const b = $('upgAll'); b.classList.add('arm'); b.textContent = `${can.length}こ 買う？`; SFX.sel(); clearTimeout(allTimer); allTimer = setTimeout(disarmAll, 3000); return; }
+  disarmAll();
+  for (const u of can){ if (S.coins < u.cost || S.upg[u.id]) continue; S.coins -= u.cost; S.upg[u.id] = true; S.stats.upgs++; n++; recalc(); }
   if (!n){ toast('いま買える改良はないよ'); SFX.no(); return; }
   disp = S.coins; SFX.upg(); toast(`改良を${n}こ買ったよ！`, 'gold'); selUpg = null; renderShop(); checkGoal(); save();
 });
@@ -2532,6 +2540,7 @@ function setShopTab(t){
   $('shopBody').hidden = t !== 'f'; $('seedBody').hidden = t !== 's';
   if (t === 's') renderSeed(); else renderShop();
 }
+let perkOpen = false;
 function renderSeed(){
   const av = seedsAv(), ok = canPres(), g = presGain();
   $('seedCard').innerHTML = `${img('i:seed', icoPB('seed'), A*1.34)}<div><b>${fmt(S.seeds)}</b><span>こ</span><br><span>使える ${fmt(av)}こ・転生 ${S.prestiges}回</span><br><span>種ボーナス 生産 <em>×${fmtX(D.seedMul)}</em></span></div>`;
@@ -2539,10 +2548,17 @@ function renderSeed(){
     ? `<p>いま工場をたたむと</p><b>いもの種 +<span id="presGainNow">${fmt(g)}</span></b><p>種ボーナスが ×${fmtX(D.seedMul)} → <span id="presPctNow">×${fmtX(seedMulOf(S.seeds + g))}</span> になるよ</p><button type="button" class="pix gold big" id="presBtn">工場をたたむ</button><p class="pnote">のこる：図鑑・実績・いもの種・種の改良・めあて／なくなる：お金・施設・改良</p>`
     : `<p>この工場でかせいだお金が ${fmt(PRES_MIN)}円 をこえると、工場をたたんで「いもの種」にかえられるよ</p><span class="qbar"><i id="presFill" style="width:${Math.min(100, S.stats.earnedRun/PRES_MIN*100)}%"></i></span><p id="presNum">${fmt(S.stats.earnedRun)} / ${fmt(PRES_MIN)}円</p><p class="pnote">のこる：図鑑・実績・いもの種・種の改良・めあて／なくなる：お金・施設・改良</p>`;
   $('perkCount').textContent = `${Object.keys(S.perk).length}/${PERKS.length}`;
+  /* 種の改良は「いま買えるもの＋その次の2つ（最低3つ）」だけ見せる。持っているものは下にたたむ（ver 1.8） */
   const kc = kisekiCost();
-  $('perkList').innerHTML = PERKS.slice().sort((a, b) => a.cost - b.cost).map(pk => { const got = !!S.perk[pk.id];
-    return `<button type="button" class="brow pix fine${got ? ' got' : av < pk.cost ? ' ng' : ''}" data-p="${pk.id}"${got ? ' aria-disabled="true"' : ''}>${img('i:' + pk.icon, icoPB(pk.icon), A, 'bico')}<span class="bmain"><span class="bname">${pk.name}</span><span class="binfo">${pk.desc}</span></span><span class="bcost">${got ? '済' : `${seedImg()}<span>${fmt(pk.cost)}</span>`}</span></button>`; }).join('')
-    + `<button type="button" class="brow pix fine${av < kc ? ' ng' : ''}" data-k="1">${img('i:imo', icoPB('imo'), A, 'bico')}<span class="bmain"><span class="bname">いもの奇跡<em>Lv.${S.kiseki}</em></span><span class="binfo">生産がさらに10倍（何回でも買える。いまは ×${fmt(Math.pow(10, S.kiseki))}）</span></span><span class="bcost">${seedImg()}<span>${fmt(kc)}</span></span></button>`;
+  const pRow = pk => { const got = !!S.perk[pk.id];
+    return `<button type="button" class="brow pix fine${got ? ' got' : av < pk.cost ? ' ng' : ''}" data-p="${pk.id}"${got ? ' aria-disabled="true"' : ''}>${img('i:' + pk.icon, icoPB(pk.icon), A, 'bico')}<span class="bmain"><span class="bname">${pk.name}</span><span class="binfo">${pk.desc}</span></span><span class="bcost">${got ? '済' : `${seedImg()}<span>${fmt(pk.cost)}</span>`}</span></button>`; };
+  const kRow = () => `<button type="button" class="brow pix fine${av < kc ? ' ng' : ''}" data-k="1">${img('i:imo', icoPB('imo'), A, 'bico')}<span class="bmain"><span class="bname">いもの奇跡<em>Lv.${S.kiseki}</em></span><span class="binfo">生産がさらに10倍（何回でも買える。いまは ×${fmt(Math.pow(10, S.kiseki))}）</span></span><span class="bcost">${seedImg()}<span>${fmt(kc)}</span></span></button>`;
+  const todo = PERKS.filter(pk => !S.perk[pk.id]).map(pk => ({pk, cost:pk.cost})).concat([{k:1, cost:kc}]).sort((a, b) => a.cost - b.cost);
+  const nOk = todo.filter(x => x.cost <= av).length, show = todo.slice(0, Math.max(3, nOk + 2));
+  if (S.kiseki > 0 && !show.some(x => x.k)) show.push({k:1});
+  const got = PERKS.filter(pk => S.perk[pk.id]).sort((a, b) => a.cost - b.cost);
+  $('perkList').innerHTML = show.map(x => x.k ? kRow() : pRow(x.pk)).join('')
+    + (got.length ? `<button type="button" class="pix fine flat morebtn" id="perkMore" aria-expanded="${perkOpen}">持っている改良 ${got.length}こ ${perkOpen ? '▲' : '▼'}</button>` + (perkOpen ? got.map(pRow).join('') : '') : '');
   seedSig = `${ok}|${av}|${Object.keys(S.perk).length}|${S.seeds}|${S.kiseki}`;
 }
 function seedTick(){
@@ -2590,6 +2606,7 @@ function doPrestige(){
 $('shopTabs').addEventListener('click', e => { const b = e.target.closest('button[data-t]'); if (!b) return; ensureAudio(); SFX.sel(); setShopTab(b.dataset.t); });
 $('seedBody').addEventListener('click', e => {
   if (e.target.closest('#presBtn')){ ensureAudio(); openPres(); return; }
+  if (e.target.closest('#perkMore')){ ensureAudio(); SFX.sel(); perkOpen = !perkOpen; renderSeed(); return; }
   if (e.target.closest('.brow[data-k]')){ ensureAudio(); buyKiseki(); return; }
   const r = e.target.closest('.brow[data-p]'); if (r){ ensureAudio(); buyPerk(r.dataset.p); }
 });
