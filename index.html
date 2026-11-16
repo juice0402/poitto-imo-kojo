@@ -191,7 +191,6 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
 .seg button[aria-pressed="true"]{--bg:var(--gold);--h2:var(--gold-hi);--l2:var(--gold-lo)}
 .sechead{display:flex;align-items:center;gap:8px}
 .sechead h3{flex:1}
-.jump{min-height:44px;padding:4px 12px;flex:none;align-self:stretch}
 .morebtn{align-self:center;min-height:40px;padding:0 16px;--bg:var(--cream-2)}
 .blist{display:flex;flex-direction:column;gap:calc(var(--px)*3)}
 .brow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:2px 12px;padding:8px 12px 8px 10px;text-align:left;width:100%;--bg:#fffaf0}
@@ -282,6 +281,17 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
 .seedcard b{font-weight:400;font-size:32px;line-height:1;font-variant-numeric:tabular-nums}
 .seedcard span{color:var(--ink-2)}
 .seedcard em{font-style:normal;color:var(--leaf-d)}
+/* 転生のページ（ver 2.3）：上に「かせぐ→たたむ→種」の3コマ、下に持っている種と生産アップ */
+.seedcard.v2{display:flex;flex-direction:column;align-items:stretch;gap:10px}
+.flow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:4px}
+.flow>div{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;text-align:center;line-height:1.25;font-size:14px;color:var(--ink)}
+.flow>i{font-style:normal;color:var(--leaf-d)}
+.sline{display:flex;align-items:baseline;gap:6px;padding-top:10px;box-shadow:inset 0 var(--ux) 0 0 #bfe0a4;flex-wrap:wrap}
+.sline b{font-size:32px}
+.sline em{margin-left:auto;font-size:16px;white-space:nowrap}
+.pres .pmul{font-size:16px;color:var(--ink-2)}
+.pres .pmul em{font-style:normal;color:var(--leaf-d)}
+.perknote{margin:-2px 0 0;font-size:14px;color:var(--ink-2)}
 .pres{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;text-align:center;--bg:#fffaf0}
 .pres b{font-weight:400;font-size:24px;line-height:1.3;color:var(--leaf-d)}
 .pres p{margin:0;line-height:1.6;color:var(--ink-2);text-wrap:pretty}
@@ -358,16 +368,14 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
   <div class="dwallet pix fine flat"><img class="pi" data-icon="coin" alt=""><b id="shopCoins">0</b><span>円</span><span id="shopRate">毎秒 +0円</span></div>
   <div class="tabs" id="shopTabs" role="group" aria-label="工場のページ"><button type="button" class="pix fine flat" data-t="f">施設と改良</button><button type="button" class="pix fine flat" data-t="s">転生<span class="tdot" id="seedDot" hidden></span></button></div>
   <div class="dbody" id="shopBody">
-    <button type="button" class="pix fine leaf jump" id="upgJump" hidden></button>
-
     <section class="sec"><div class="sechead"><h3>施設</h3><div class="seg" id="buySeg" role="group" aria-label="まとめ買い"><button type="button" class="pix fine flat" data-n="1">×1</button><button type="button" class="pix fine flat" data-n="10">×10</button><button type="button" class="pix fine flat" data-n="100">×100</button></div></div><div class="blist" id="bldList"></div></section>
     <section class="sec"><div class="sechead"><h3>改良 <small id="upgCount"></small></h3></div><div class="ugrid" id="upgGrid"></div><button type="button" class="pix fine flat morebtn" id="upgMore" hidden></button><div class="udetail pix fine flat" id="upgDetail" hidden></div></section>
     <section class="sec"><h3>きろく</h3><div class="stats" id="stats"></div></section>
   </div>
   <div class="dbody" id="seedBody" hidden>
-    <div class="seedcard pix fine flat" id="seedCard"></div>
+    <div class="seedcard v2 pix fine flat" id="seedCard"></div>
     <section class="sec"><h3>工場をたたむ</h3><div class="pres pix fine flat" id="presBox"></div></section>
-    <section class="sec"><h3>種の改良 <small id="perkCount"></small></h3><div class="blist" id="perkList"></div></section>
+    <section class="sec"><h3>種の改良 <small id="perkCount"></small></h3><p class="perknote" id="perkNote" hidden>種は使っても、生産アップはへらないよ</p><div class="blist" id="perkList"></div></section>
   </div>
 </aside>
 
@@ -456,7 +464,7 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
   <div class="logo"><span class="l1">ぽいっと！</span><span class="l2">いも工場</span></div>
   <div class="tpots" id="tpots"></div>
   <p class="tap">タップしてはじめる</p>
-  <p class="tver">ver 2.2</p>
+  <p class="tver">ver 2.3</p>
 </div>
 
 <script>
@@ -2523,8 +2531,6 @@ function updateAfford(){
   }
   const list = availUpgs();
   for (const u of list){ if (S.coins >= u.cost) n++; if (openDr === 'shop'){ const el = upgGrid.querySelector(`[data-u="${u.id}"]`); if (el) el.classList.toggle('ng', S.coins < u.cost); } }
-  const na = list.filter(u => S.coins >= u.cost).length;
-  const uj = $('upgJump'); if (uj){ uj.hidden = !na; if (na && uj.dataset.n !== String(na)){ uj.dataset.n = na; uj.textContent = `改良が ${na}こ 買えるよ ↓`; } }
   const ub = $('udBuy'); if (ub && UI[ub.dataset.u]) ub.setAttribute('aria-disabled', String(S.coins < UI[ub.dataset.u].cost));
   if (openDr === 'shop' && shopTab === 'f'){ const sig = list.map(u => u.id).join(',') + '|' + vis.length + '|' + vis.filter(v => v.mys).map(v => v.b.id).join(''); if (sig !== shopSig) renderShop(); }
   const sr = seedReady(); if (sr) n++; $('seedDot').hidden = !sr; seedTick();
@@ -2557,7 +2563,6 @@ function buyUpg(id){
   selUpg = null; renderShop(); checkGoal(); save();
 }
 bldList.addEventListener('click', e => { const r = e.target.closest('.brow[data-b]'); if (r){ ensureAudio(); buyBld(r.dataset.b); } });
-$('upgJump').addEventListener('click', () => { SFX.sel(); upgGrid.scrollIntoView({block:'start', behavior:'smooth'}); });
 $('upgMore').addEventListener('click', () => { upgOpen = !upgOpen; SFX.sel(); renderShop(); });
 upgGrid.addEventListener('click', e => {
   const c = e.target.closest('.ucell'); if (!c) return;
@@ -2581,11 +2586,12 @@ function setShopTab(t){
 let perkOpen = false;
 function renderSeed(){
   const av = seedsAv(), ok = canPres(), g = presGain();
-  $('seedCard').innerHTML = `${img('i:seed', icoPB('seed'), A*1.34)}<div><b>${fmt(S.seeds)}</b><span>こ</span><br><span>使える ${fmt(av)}こ・転生 ${S.prestiges}回</span><br><span>種ボーナス 生産 <em>×${fmtX(D.seedMul)}</em></span></div>`;
+  $('seedCard').innerHTML = `<div class="flow"><div>${img('i:coin', icoPB('coin'), A)}<span>${fmt(PRES_MIN)}円<br>かせぐ</span></div><i>▶</i><div>${img('i:factory', icoPB('factory'), A)}<span>工場を<br>たたむ</span></div><i>▶</i><div>${img('i:seed', icoPB('seed'), A)}<span>種で<br>生産アップ</span></div></div>`
+    + `<div class="sline">${seedImg()}<span>いもの種</span><b>${fmt(S.seeds)}</b><span>こ</span><em>生産 ×${fmtX(D.seedMul)}</em></div>`;
   $('presBox').innerHTML = ok
-    ? `<p>いま工場をたたむと</p><b>いもの種 +<span id="presGainNow">${fmt(g)}</span></b><p>種ボーナスが ×${fmtX(D.seedMul)} → <span id="presPctNow">×${fmtX(seedMulOf(S.seeds + g))}</span> になるよ</p><button type="button" class="pix gold big" id="presBtn">工場をたたむ</button><p class="pnote">のこる：図鑑・実績・いもの種・種の改良・めあて／なくなる：お金・施設・改良</p>`
-    : `<p>この工場でかせいだお金が ${fmt(PRES_MIN)}円 をこえると、工場をたたんで「いもの種」にかえられるよ</p><span class="qbar"><i id="presFill" style="width:${Math.min(100, S.stats.earnedRun/PRES_MIN*100)}%"></i></span><p id="presNum">${fmt(S.stats.earnedRun)} / ${fmt(PRES_MIN)}円</p><p class="pnote">のこる：図鑑・実績・いもの種・種の改良・めあて／なくなる：お金・施設・改良</p>`;
-  $('perkCount').textContent = `${Object.keys(S.perk).length}/${PERKS.length}`;
+    ? `<p>いま たたむと</p><b>いもの種 +<span id="presGainNow">${fmt(g)}</span></b><p class="pmul">生産 ×${fmtX(D.seedMul)} → <em id="presPctNow">×${fmtX(seedMulOf(S.seeds + g))}</em></p><button type="button" class="pix gold big" id="presBtn">工場をたたむ</button><p class="pnote">のこる：図鑑・実績・いもの種・種の改良・めあて<br>なくなる：お金・施設・改良</p>`
+    : `<span class="qbar"><i id="presFill" style="width:${Math.min(100, S.stats.earnedRun/PRES_MIN*100)}%"></i></span><p id="presNum">${fmt(S.stats.earnedRun)} / ${fmt(PRES_MIN)}円</p><p class="pnote">のこる：図鑑・実績・いもの種・種の改良・めあて<br>なくなる：お金・施設・改良</p>`;
+  $('perkCount').textContent = `使える ${fmt(av)}こ`; $('perkNote').hidden = !S.seeds;
   /* 種の改良は「いま買えるもの＋その次の2つ（最低3つ）」だけ見せる。持っているものは下にたたむ（ver 1.8） */
   const kc = kisekiCost();
   const pRow = pk => { const got = !!S.perk[pk.id];
