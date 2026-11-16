@@ -82,6 +82,16 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
 .qnote.done{animation:qdone3 .6s steps(4)}
 @keyframes peek{88%{translate:calc(var(--px)*-3) 0}92%{translate:calc(var(--px)*-1) 0}96%{translate:none}}
 @keyframes qdone3{0%,50%{--bg:#fffbe0}}
+/* めあて達成：付箋が出てきてキラキラするだけ（ver 2.1。お知らせの帯は出さない） */
+.qsp{position:absolute;inset:0;pointer-events:none;display:none}
+.qnote.done .qsp{display:block}
+.qsp i{position:absolute;width:var(--px);height:var(--px);background:#fff;box-shadow:0 calc(var(--px)*-1) 0 var(--gold),0 var(--px) 0 var(--gold),calc(var(--px)*-1) 0 0 var(--gold),var(--px) 0 0 var(--gold);opacity:0;animation:qtw .8s steps(4) 2}
+.qsp i:nth-child(1){left:16%;top:-2px}
+.qsp i:nth-child(2){left:44%;top:4px;animation-delay:.2s}
+.qsp i:nth-child(3){left:70%;top:-3px;animation-delay:.4s}
+.qsp i:nth-child(4){left:32%;bottom:-2px;animation-delay:.3s}
+.qsp i:nth-child(5){left:88%;bottom:3px;animation-delay:.1s}
+@keyframes qtw{0%{opacity:0;transform:scale(.5)}25%{opacity:1;transform:scale(1.5)}60%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.5)}}
 .qnote::before{content:"";position:absolute;left:0;top:0;bottom:0;width:calc(var(--px)*2);background:#f0d360;box-shadow:inset calc(var(--px)*-1) 0 0 #d9b843}
 .qhead,.qbody{display:flex;flex-direction:column;justify-content:center;gap:2px;padding:6px 0}
 .qhead{flex:none;padding-left:calc(10px + var(--px)*3);padding-right:calc(env(safe-area-inset-right,0px) + 10px)}
@@ -99,7 +109,7 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
 #qRew{color:#7a3e00;white-space:nowrap}
 .fever{margin-top:calc(max(44px,calc(var(--px)*16)) + 24px)}
 .znew{position:absolute;top:-10px;right:-8px;padding:0 5px;line-height:1.4;color:#fff;--bg:var(--red);--h2:#ff8c74;--l2:#9e2f1c}
-.znew.hop{animation:hop .6s steps(6)}
+.znew.hop,.badge.hop{animation:hop .6s steps(6)}
 @keyframes hop{0%,100%{transform:none}17%{transform:translateY(calc(var(--px)*-6))}34%{transform:translateY(calc(var(--px)*-2))}50%{transform:translateY(calc(var(--px)*-4))}67%{transform:translateY(calc(var(--px)*-1))}}
 .zcell{position:relative}
 .znw{position:absolute;top:calc(var(--ux)*2);left:calc(var(--ux)*2);padding:0 4px;line-height:1.3;font-size:14px;color:#fff;background:var(--red)}
@@ -132,7 +142,7 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
 .dbtn .dl{line-height:1}
 .dchip{position:absolute;bottom:calc(100% + 6px);top:auto;right:0;padding:0 6px;line-height:1.5;font-variant-numeric:tabular-nums}
 .badge{position:absolute;bottom:calc(100% + 6px);top:auto;left:0;min-width:calc(var(--px)*9);padding:0 6px;line-height:1.5;text-align:center;color:#fff;--bg:var(--red);--h2:#ff8c74;--l2:#9e2f1c}
-#shopBtn .badge{left:auto;right:0}
+#shopBtn .badge{top:-10px;right:-8px;bottom:auto;left:auto;min-width:0;padding:0 5px;line-height:1.4}
 .badge.pr{--bg:var(--gold);--h2:var(--gold-hi);--l2:var(--gold-lo);color:var(--ink)}
 .badge.pop{animation:bpop .4s steps(4)}
 @keyframes bpop{50%{transform:translateY(calc(var(--px)*-3))}}
@@ -182,9 +192,6 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
 .sechead{display:flex;align-items:center;gap:8px}
 .sechead h3{flex:1}
 .jump{min-height:44px;padding:4px 12px;flex:none;align-self:stretch}
-.minib{min-height:36px;padding:0 10px;white-space:nowrap;--bg:var(--leaf);--h2:var(--leaf-hi);--l2:var(--leaf-lo)}
-.minib.arm{--bg:var(--gold);--h2:var(--gold-hi);--l2:var(--gold-lo);color:var(--ink);animation:ready 1s steps(1) infinite}
-.minib[aria-disabled="true"]{--bg:var(--cream-2);--h2:var(--hi);--l2:var(--lo);color:var(--ink-2)}
 .morebtn{align-self:center;min-height:40px;padding:0 16px;--bg:var(--cream-2)}
 .blist{display:flex;flex-direction:column;gap:calc(var(--px)*3)}
 .brow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:2px 12px;padding:8px 12px 8px 10px;text-align:left;width:100%;--bg:#fffaf0}
@@ -303,8 +310,8 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
 .logo .l1{color:var(--cream)}
 .logo .l2{color:var(--gold)}
 .tpots{display:flex;gap:calc(var(--px)*4);align-items:flex-end}
-.tp{animation:hop .9s steps(2) infinite}
-@keyframes hop{50%{transform:translateY(calc(var(--px)*-3))}}
+.tp{animation:tphop .9s steps(2) infinite}
+@keyframes tphop{50%{transform:translateY(calc(var(--px)*-3))}}
 .tap{margin:0;color:var(--cream);animation:blink 1s steps(1) infinite;text-shadow:0 var(--ux) 0 var(--ink)}
 @keyframes blink{50%{opacity:0}}
 .tver{margin:0;color:#b8a78c}
@@ -330,7 +337,7 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
       <button class="sq pix" id="menuBtn" type="button" aria-label="メニュー"><img class="pi" data-icon="gear" alt=""></button>
     </div>
   </div>
-  <button class="qnote pix" id="questTab" type="button" aria-expanded="false"><span class="qhead"><span class="qtl"><i class="chev"></i>めあて</span><span class="q2"><span class="qtbar"><i id="qTabFill"></i></span></span></span><span class="qbody" id="quest"><span id="qText">芋を10こ出荷する</span><span class="q2"><span class="qbar"><i id="qFill"></i></span><span id="qProg">0/10</span><span id="qRew"></span></span></span></button>
+  <button class="qnote pix" id="questTab" type="button" aria-expanded="false"><span class="qhead"><span class="qtl"><i class="chev"></i>めあて</span><span class="q2"><span class="qtbar"><i id="qTabFill"></i></span></span></span><span class="qbody" id="quest"><span id="qText">芋を10こ出荷する</span><span class="q2"><span class="qbar"><i id="qFill"></i></span><span id="qProg">0/10</span><span id="qRew"></span></span></span><span class="qsp" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></button>
   <div class="fever pix gold" id="fever" hidden><span id="feverName">フィーバー！</span> <b id="feverM">5</b>倍 あと <b id="feverT">20</b>秒</div>
 </header>
 <div class="toast pix" id="toast" role="status" aria-live="polite"></div>
@@ -354,7 +361,7 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
     <button type="button" class="pix fine leaf jump" id="upgJump" hidden></button>
 
     <section class="sec"><div class="sechead"><h3>施設</h3><div class="seg" id="buySeg" role="group" aria-label="まとめ買い"><button type="button" class="pix fine flat" data-n="1">×1</button><button type="button" class="pix fine flat" data-n="10">×10</button><button type="button" class="pix fine flat" data-n="100">×100</button></div></div><div class="blist" id="bldList"></div></section>
-    <section class="sec"><div class="sechead"><h3>改良 <small id="upgCount"></small></h3><button type="button" class="pix fine minib" id="upgAll">買えるのをぜんぶ</button></div><div class="ugrid" id="upgGrid"></div><button type="button" class="pix fine flat morebtn" id="upgMore" hidden></button><div class="udetail pix fine flat" id="upgDetail" hidden></div></section>
+    <section class="sec"><div class="sechead"><h3>改良 <small id="upgCount"></small></h3></div><div class="ugrid" id="upgGrid"></div><button type="button" class="pix fine flat morebtn" id="upgMore" hidden></button><div class="udetail pix fine flat" id="upgDetail" hidden></div></section>
     <section class="sec"><h3>きろく</h3><div class="stats" id="stats"></div></section>
   </div>
   <div class="dbody" id="seedBody" hidden>
@@ -449,7 +456,7 @@ button.qnote.open:active:not([aria-disabled="true"]){transform:none}
   <div class="logo"><span class="l1">ぽいっと！</span><span class="l2">いも工場</span></div>
   <div class="tpots" id="tpots"></div>
   <p class="tap">タップしてはじめる</p>
-  <p class="tver">ver 2.0</p>
+  <p class="tver">ver 2.1</p>
 </div>
 
 <script>
@@ -2348,12 +2355,14 @@ function fitQuest(){
   qNote.style.setProperty('--bw', bw); void qNote.offsetWidth;
   if (shut) qNote.style.transition = ''; qNote.classList.add('qready');
 }
+let qHold = 0;
 function checkGoal(){
+  if (performance.now() < qHold) return;
   const g = GOALS[S.goal];
   if (!g){ setQuest('ぜんぶ達成！のんびり工場をそだてよう', '', '', 100); return; }
   const v = Math.min(g.n, g.v());
+  if (v >= g.n){ earn(g.r); S.goal++; SFX.goal(); setQuest(g.t, '達成！', '+' + fmt(g.r) + '円', 100); restart(qNote, 'done'); questShow(4); qHold = performance.now() + 1800; save(); return; }
   setQuest(g.t, `${fmt(v)}/${fmt(g.n)}`, '+' + fmt(g.r) + '円', v/g.n*100);
-  if (v >= g.n){ earn(g.r); S.goal++; toast(`めあて達成！ +${fmt(g.r)}円`, 'gold'); SFX.goal(); restart(qNote, 'done'); questShow(4); save(); checkGoal(); }
 }
 function questShow(sec){ qNote.classList.add('open'); qNote.setAttribute('aria-expanded', 'true'); questT = Math.max(questT, sec); }
 function questHide(){ questT = 0; qNote.classList.remove('open', 'done'); qNote.setAttribute('aria-expanded', 'false'); }
@@ -2499,14 +2508,14 @@ function updateAfford(){
   }
   const list = availUpgs();
   for (const u of list){ if (S.coins >= u.cost) n++; if (openDr === 'shop'){ const el = upgGrid.querySelector(`[data-u="${u.id}"]`); if (el) el.classList.toggle('ng', S.coins < u.cost); } }
-  const ua = $('upgAll'), na = list.filter(u => S.coins >= u.cost).length; if (ua) ua.setAttribute('aria-disabled', String(!na));
+  const na = list.filter(u => S.coins >= u.cost).length;
   const uj = $('upgJump'); if (uj){ uj.hidden = !na; if (na && uj.dataset.n !== String(na)){ uj.dataset.n = na; uj.textContent = `改良が ${na}こ 買えるよ ↓`; } }
   const ub = $('udBuy'); if (ub && UI[ub.dataset.u]) ub.setAttribute('aria-disabled', String(S.coins < UI[ub.dataset.u].cost));
   if (openDr === 'shop' && shopTab === 'f'){ const sig = list.map(u => u.id).join(',') + '|' + vis.length + '|' + vis.filter(v => v.mys).map(v => v.b.id).join(''); if (sig !== shopSig) renderShop(); }
   const sr = seedReady(); if (sr) n++; $('seedDot').hidden = !sr; seedTick();
   if (n !== lastBadge){
     const b = $('shopBadge');
-    if (n > lastBadge && lastBadge >= 0) restart(b, 'pop');
+    if (n > lastBadge && lastBadge >= 0) restart(b, 'hop');
     lastBadge = n; b.textContent = n; b.hidden = n === 0;
   }
   { const b = $('shopBadge'), pr = canPres(); b.classList.toggle('pr', pr); if (pr){ b.textContent = '転生'; b.hidden = false; } else if (b.textContent === '転生'){ b.textContent = lastBadge; b.hidden = lastBadge === 0; }
@@ -2535,19 +2544,6 @@ function buyUpg(id){
 bldList.addEventListener('click', e => { const r = e.target.closest('.brow[data-b]'); if (r){ ensureAudio(); buyBld(r.dataset.b); } });
 $('upgJump').addEventListener('click', () => { SFX.sel(); upgGrid.scrollIntoView({block:'start', behavior:'smooth'}); });
 $('upgMore').addEventListener('click', () => { upgOpen = !upgOpen; SFX.sel(); renderShop(); });
-/* 「買えるのをぜんぶ」は2回おし：1回目は「〇こ買う？」に変わるだけ（3秒でもどる）。2回目で、そのとき買えるものだけ買う（ver 1.8） */
-let allArm = false, allTimer = 0;
-function disarmAll(){ allArm = false; clearTimeout(allTimer); const b = $('upgAll'); b.classList.remove('arm'); b.textContent = '買えるのをぜんぶ'; }
-$('upgAll').addEventListener('click', () => {
-  ensureAudio(); let n = 0;
-  const can = availUpgs().filter(x => S.coins >= x.cost).sort((a, b) => a.cost - b.cost);
-  if (!can.length){ disarmAll(); toast('いま買える改良はないよ'); SFX.no(); return; }
-  if (!allArm){ allArm = true; const b = $('upgAll'); b.classList.add('arm'); b.textContent = `${can.length}こ 買う？`; SFX.sel(); clearTimeout(allTimer); allTimer = setTimeout(disarmAll, 3000); return; }
-  disarmAll();
-  for (const u of can){ if (S.coins < u.cost || S.upg[u.id]) continue; S.coins -= u.cost; S.upg[u.id] = true; S.stats.upgs++; n++; recalc(); }
-  if (!n){ toast('いま買える改良はないよ'); SFX.no(); return; }
-  disp = S.coins; SFX.upg(); toast(`改良を${n}こ買ったよ！`, 'gold'); selUpg = null; renderShop(); checkGoal(); save();
-});
 upgGrid.addEventListener('click', e => {
   const c = e.target.closest('.ucell'); if (!c) return;
   ensureAudio(); selUpg = c.dataset.u;
