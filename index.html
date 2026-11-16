@@ -416,10 +416,8 @@ button.pix:active:not([aria-disabled="true"]){transform:translateY(var(--u));--d
 
 <div class="modal" id="awayModal" hidden>
   <div class="mpanel pix" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="awayTitle">
-    <h2 id="awayTitle">おかえり！</h2>
-    <p id="awayText">留守のあいだも、工場は動いていたよ</p>
+    <h2 id="awayTitle">留守のあいだに</h2>
     <div class="awayamt"><img class="pi" data-icon="coin" data-s="2" alt=""><span id="awayAmt">+0円</span></div>
-    <div class="meta" id="awayMeta">留守ボーナス：毎秒の1割・いちばん長くて8時間ぶん</div>
     <button class="pix gold big" id="awayOk" type="button">うけとる</button>
   </div>
 </div>
@@ -442,7 +440,7 @@ button.pix:active:not([aria-disabled="true"]){transform:translateY(var(--u));--d
   <div class="logo"><span class="l1">ぽいっと！</span><span class="l2">いも工場</span></div>
   <div class="tpots" id="tpots"></div>
   <p class="tap">タップしてはじめる</p>
-  <p class="tver">ver 1.4</p>
+  <p class="tver">ver 1.5</p>
 </div>
 
 <script>
@@ -2391,9 +2389,7 @@ function calcAway(fromMs){
 }
 function showAway(){
   if (!awayPend) return;
-  $('awayText').textContent = `留守のあいだ（${fmtTime(awayPend.sec)}）も、工場は動いていたよ`;
   $('awayAmt').textContent = '+' + fmt(awayPend.amt) + '円';
-  $('awayMeta').textContent = S.perk.toki ? '留守ボーナス：毎秒の5割・いちばん長くて24時間ぶん' : S.perk.rusuban ? '留守ボーナス：毎秒の2.5割・いちばん長くて12時間ぶん' : '留守ボーナス：毎秒の1割・いちばん長くて8時間ぶん';
   $('awayModal').hidden = false; $('awayModal').querySelector('.mpanel').focus({preventScroll:true}); SFX.upg();
 }
 function takeAway(){
