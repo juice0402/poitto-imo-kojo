@@ -351,6 +351,8 @@ function potatoPB(kind, blink){
   const sp = POT[kind], P = PAL[sp.pal], W = sp.w, H = sp.h, S = shapeOf(sp);
   const pb = new PB(W, H), body = new Uint8Array(W*H);
   for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) if (S.f(x + .5, y + .5)) body[y*W + x] = 1;
+  /* 1ドットだけ飛び出す所（楕円のはしなど）をけずる（v1.2・しょーくん「にこにこいもの左にドット抜けみたいな飛び出し」）。とがらせたい形（sharp：星・月・おばけのすそ・プリズム・ダイヤ・ホットケーキ・精霊の炎）はそのまま */
+  if (!sp.sharp) for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++){ const i = y*W + x; if (body[i] && body[i-1] + body[i+1] + body[i-W] + body[i+W] <= 1) body[i] = 0; }
   const ins = (x, y) => x >= 0 && y >= 0 && x < W && y < H && body[y*W + x] === 1;
   const tone = new Array(W*H).fill(null);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++){
