@@ -28,7 +28,7 @@ function load(){
   }catch(e){}
   return null;
 }
-function save(){ S.lastSeen = Date.now(); try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+function save(){ if (SHOT) return; S.lastSeen = Date.now(); try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 const foundCount = () => ORDER.filter(k => S.found[k] > 0).length;
 const farmLv = () => { let n = 0; for (const f of FARM_IDS){ if (!S.upg[f]) break; n++; } return n; };
 

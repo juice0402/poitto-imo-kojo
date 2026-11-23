@@ -109,7 +109,8 @@ function startFever(star){
   if (lv === 1) S.stats.superFevers++; if (lv === 2) S.stats.goldFevers++; if (lv === 3) S.stats.diaFevers++;
   (lv ? SFX.superFever : SFX.fever)(); if (lv >= 2) SFX.get();
   $('fever').hidden = false; $('feverName').textContent = FEV_NAME[feverLv]; $('feverM').textContent = feverM;
-  toast(`${FEV_NAME[feverLv]} ${Math.ceil(feverT)}秒間、なにもかも${feverM}倍！`, 'gold');
+  /* 「40」と「秒間」が別の行に分かれないように、名前のあとで改行（ver 2.8） */
+  toast(`${FEV_NAME[feverLv]}\n${Math.ceil(feverT)}秒間、なにもかも${feverM}倍！`, 'gold');
   if (lv >= 2) restart($('flash'), 'go');
   BGM.fever(true);
 }
