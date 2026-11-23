@@ -103,13 +103,15 @@ const FEV_NAME = ['フィーバー！', 'スーパーフィーバー！', '黄�
 let feverLv = 0;
 function startFever(star){
   const lv = star >= 7 ? 3 : star === 6 ? 2 : star === 5 ? 1 : 0;
-  const mul = [D.feverMul, D.feverMul*2, 77, 777][lv], dur = [D.feverDur, D.feverDur + 10, D.feverDur + 10, 15 + Math.max(0, D.feverDur - 20)/2][lv];
+  /* 黄金・ダイヤモンドは 100倍・1000倍（ver 2.8。77・777 はスロットの当たりの数字に見えるので、App Store の審査のために変えた） */
+  const mul = [D.feverMul, D.feverMul*2, 100, 1000][lv], dur = [D.feverDur, D.feverDur + 10, D.feverDur + 10, 15 + Math.max(0, D.feverDur - 20)/2][lv];
   if (feverT <= 0 || mul >= feverM){ feverT = mul > feverM ? dur : Math.max(feverT, dur); feverM = mul; feverLv = lv; }
   S.stats.fevers++;
   if (lv === 1) S.stats.superFevers++; if (lv === 2) S.stats.goldFevers++; if (lv === 3) S.stats.diaFevers++;
   (lv ? SFX.superFever : SFX.fever)(); if (lv >= 2) SFX.get();
   $('fever').hidden = false; $('feverName').textContent = FEV_NAME[feverLv]; $('feverM').textContent = feverM;
-  toast(`${FEV_NAME[feverLv]} ${Math.ceil(feverT)}秒間、なにもかも${feverM}倍！`, 'gold');
+  /* 「40」と「秒間」が別の行に分かれないように、名前のあとで改行（ver 2.8） */
+  toast(`${FEV_NAME[feverLv]}\n${Math.ceil(feverT)}秒間、なにもかも${feverM}倍！`, 'gold');
   if (lv >= 2) restart($('flash'), 'go');
   BGM.fever(true);
 }

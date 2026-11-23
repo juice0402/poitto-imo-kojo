@@ -172,6 +172,7 @@ function start(data){
   if (document.fonts && document.fonts.load) document.fonts.load(`16px ${FONT}`).then(() => cachePos()).catch(() => {});
   $('title').focus({preventScroll:true});
   requestAnimationFrame(frame);
+  shotGo();
 }
 const hot = window.claude && window.claude.hot;
 if (hot && typeof hot.snapshot === 'function') hot.snapshot(() => ({S, playing:!titleOn}));
