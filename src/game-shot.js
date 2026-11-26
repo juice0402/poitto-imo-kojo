@@ -2,6 +2,7 @@
    URL のうしろに #shot=〇〇 をつけると、きまった場面を出す（このときはセーブしない＝遊んでいるデータはそのまま）
    belt：工場がそだったころのベルト／fever：スーパーフィーバー／zukan：図鑑（レア芋）／card:<芋の名前>：芋のカード（ふつうは niko）
    shop：工場（施設）／icon：アプリのアイコン（1024×1024 の画面で撮る）
+   badge:<実績の id>：Game Center の実績のバッジ（1024×1024・tools/badges.py がぜんぶ撮って docs/kobo/achievements/ に入れる）
    ios-kobo の apps/<ゲーム>/app.json の screenshots で、js から location.hash を変えて使う */
 let SHOT = '';
 /* 1周目の後半くらいの工場（施設11しゅるい・畑4つ・レア芋はおよそ半分） */
@@ -39,6 +40,7 @@ function shotGo(){
   $('toast').classList.remove('show'); $('achPop').classList.remove('show'); achQ.length = 0; qDoneQ.length = 0;
   awayPend = null; $('title').hidden = true; titleOn = false;
   if (SHOT === 'icon'){ shotIcon(); return; }
+  if (SHOT === 'badge'){ shotBadge(m[2]); return; }
   shotState(); renderDock(); renderAchBadge(); checkGoal(); updateAfford();
   shotBelt(['niko', 'hoshi', 'heart']);
   if (SHOT === 'fever') startFever(5);
@@ -65,9 +67,58 @@ function shotIcon(){
     pb.set(cx, cy, W);
   };
   sp(true, 21, 4); sp(false, 4, 7); sp(false, 22, 19);
+  shotShow(pb, Z, '#8fd96a');
+}
+/* ドットの板を Z 倍にして、1024×1024 のまん中を画面いっぱいに出す */
+function shotShow(pb, Z, bg){
   const big = pb.canvas(Z), cv2 = document.createElement('canvas'); cv2.width = cv2.height = 1024;
-  const g = cv2.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(big, -(N*Z - 1024)/2, -(N*Z - 1024)/2);
+  const g = cv2.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(big, -(pb.w*Z - 1024)/2, -(pb.h*Z - 1024)/2);
   let ov = $('shotIcon'); if (!ov){ ov = document.createElement('div'); ov.id = 'shotIcon'; document.body.appendChild(ov); }
-  ov.style.cssText = 'position:fixed;left:0;top:0;width:1024px;height:1024px;z-index:99;background:#8fd96a';
+  ov.style.cssText = `position:fixed;left:0;top:0;width:1024px;height:1024px;z-index:99;background:${bg}`;
   ov.innerHTML = `<img alt="" src="${cv2.toDataURL()}" style="display:block;width:1024px;height:1024px">`;
+}
+/* Game Center の実績のバッジ：メダルのまん中に、その実績らしい絵（ゲームのアイコンか芋）。点でメダルの色が変わる（10 銅・25 銀・50 金・100 ダイヤ） */
+const BADGE = {
+  ship1:['i', 'box', 10], rare1:['p', 'hoshi', 10], fev1:['i', 'star', 10],
+  flick2:['i', 'glove', 25], all10:['i', 'factory', 25], earn4:['c', 'coin', 25], sfev:['i', 'bang', 25],
+  pres1:['i', 'seed', 50], zt50:['i', 'book', 50], play3:['i', 'time', 50], gfev:['p', 'kin', 50], mabo:['p', 'maboroshi', 50],
+  dfev:['p', 'diamond', 100], all20:['i', 'trophy', 100], zkr:['p', 'niji', 100],
+};
+/* うしろの明るい色・暗い色／メダルのふちの暗い・ふつう・明るい／メダルの面の明るい・暗い */
+const BADGE_TIER = {
+  10: ['#f7e6d2', '#ecd0b2', '#8a5230', '#c8814a', '#eab182', '#f8dfc4', '#eccaa5'],
+  25: ['#eef2f6', '#d8e0e8', '#66717f', '#a7b1bd', '#e2e7ee', '#f3f6f9', '#dde3ea'],
+  50: ['#fdf3cf', '#f6e09a', '#a87412', '#ecb526', '#ffe27a', '#fff5d2', '#fbe7a6'],
+  100:['#e3f7fd', '#bfeaf7', '#2f7fa8', '#5cc4ea', '#bff0ff', '#f0fcff', '#d2f1fb'],
+};
+function shotBadge(id){
+  const b = BADGE[id] || BADGE.ship1, T = BADGE_TIER[b[2]], N = 32, c = N/2, pb = new ART.PB(N, N);
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++){
+    const r = Math.hypot(x + .5 - c, y + .5 - c)/(N*.6);
+    pb.set(x, y, (r - .5)*3 + BAYER[y % 4][x % 4]/16*.9 > 0 ? T[1] : T[0]);
+  }
+  /* メダル：外の線・ふち（左上が明るく、右下が暗い）・面 */
+  pb.disc(c, c, 13.6, '#3b2a20');
+  pb.fill((x, y) => (x-c)**2 + (y-c)**2 <= 12.7**2, T[3]);
+  pb.fill((x, y) => (x-c)**2 + (y-c)**2 <= 12.7**2 && (x-c) + (y-c) < -9, T[4]);
+  pb.fill((x, y) => (x-c)**2 + (y-c)**2 <= 12.7**2 && (x-c) + (y-c) > 9, T[2]);
+  pb.disc(c, c, 10.8, T[2]);
+  pb.disc(c, c, 10, T[5]);
+  pb.fill((x, y) => (x-c)**2 + (y-c)**2 <= 100 && (x-c) + (y-c) > 6.5, T[6]);
+  /* まん中の絵 */
+  const sp = b[0] === 'p' ? ART.potatoPB(b[1]) : ART.iconPB(b[1]);
+  const put = (dx, dy) => {
+    const ox = Math.round((N - sp.w)/2) + dx, oy = Math.round((N - sp.h)/2) + dy;
+    for (let y = 0; y < sp.h; y++) for (let x = 0; x < sp.w; x++){ const col = sp.get(x, y); if (col) pb.set(ox + x, oy + y, col); }
+  };
+  /* 'c' はコインの山（コインは小さいので3まい） */
+  if (b[0] === 'c'){ put(0, -4); put(-5, 3); put(5, 3); } else put(0, 0);
+  /* キラキラ：金とダイヤだけ（ダイヤは3つ） */
+  const kira = (big, cx, cy) => {
+    for (let d = 1; d <= (big ? 2 : 1); d++) for (const [dx, dy] of [[0,1],[0,-1],[1,0],[-1,0]]) pb.set(cx + dx*d, cy + dy*d, big && d < 2 ? '#ffffff' : '#ffe066');
+    pb.set(cx, cy, '#ffffff');
+  };
+  if (b[2] >= 50){ kira(true, 26, 4); kira(false, 4, 26); }
+  if (b[2] >= 100) kira(false, 28, 22);
+  shotShow(pb, 32, T[1]);
 }

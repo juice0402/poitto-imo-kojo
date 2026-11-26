@@ -130,7 +130,7 @@ const paused = () => titleOn || !!openDr || PAUSE_EL.some(e => !e.hidden);
 cv.addEventListener('pointerdown', e => { ensureAudio(); if (paused()) return; tapAt(e.clientX/A, e.clientY/A); });
 let hiddenAt = 0;
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden){ hiddenAt = Date.now(); if (!titleOn) save(); if (AC && AC.state === 'running') AC.suspend().catch(() => {}); return; }
+  if (document.hidden){ hiddenAt = Date.now(); if (!titleOn){ save(); gcScore(true); } if (AC && AC.state === 'running') AC.suspend().catch(() => {}); return; }
   if (AC && AC.state === 'suspended') AC.resume().then(() => BGM.resync()).catch(() => {});
   if (hiddenAt && !titleOn && !awayPend){ awayPend = calcAway(hiddenAt); if (awayPend) showAway(); }
   hiddenAt = 0; last = 0;
@@ -172,7 +172,7 @@ function start(data){
   if (document.fonts && document.fonts.load) document.fonts.load(`16px ${FONT}`).then(() => cachePos()).catch(() => {});
   $('title').focus({preventScroll:true});
   requestAnimationFrame(frame);
-  shotGo();
+  shotGo(); gcSync();
 }
 const hot = window.claude && window.claude.hot;
 if (hot && typeof hot.snapshot === 'function') hot.snapshot(() => ({S, playing:!titleOn}));

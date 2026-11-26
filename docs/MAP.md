@@ -16,11 +16,14 @@
   - game-core.js：状態 DEF・merge（古いセーブの補い）・load・save（セーブ名 imo-v2）／計算 recalc（D.cps・D.interval・D.lineRate）・earn／数字 fmt・fmtR・fmtTime／画面の大きさ resize・layout・buildStatic／pix・img（ドット絵を部品に）／音 SFX・BGM
   - game-belt.js：ベルトの上 warm（はじめのゆっくり）・spawn・tapAt・ship・startFever・beltTick・fxTick・econTick／描く drawBelt・drawPot・drawStations・draw
   - game-ui.js：toast・alignRows・fitText・hudTick（お知らせの順番・calmT）・fitCoins/fitRate（上のお金・毎秒をボタンにかからない大きさに）・setQuest・checkGoal・holdAchPop／実績 checkAch・renderAch／留守 calcAway・showAway／工場 renderShop・bldRow・buyBld・buyUpg／転生 renderSeed・doPrestige
-  - game-shot.js：スクショの場面（App Store 用・ver 2.8）。URL の #shot=belt・fever・zukan・card:<芋>・shop・icon で、きまった場面を出す（セーブしない）。shotState（見本の工場）・shotBelt（ベルトを動かしたあとの形）・shotIcon（アイコン 1024）
+  - game-gc.js：Game Center（ver 2.9）。アプリが APP_SCORE・APP_ACHIEVE を用意したときだけ送る。GC_ACH（実績15こ・ID は 'imo_' + ACH の id）・gcAch（checkAch から）・gcScore（出荷数・5秒ごとの save と画面を閉じたとき・60秒に1回まで）・gcSync（開いたときと app-gamecenter）
+  - game-shot.js：スクショの場面（App Store 用・ver 2.8）。URL の #shot=belt・fever・zukan・card:<芋>・shop・icon・badge:<実績の id> で、きまった場面を出す（セーブしない）。shotState（見本の工場）・shotBelt（ベルトを動かしたあとの形）・shotIcon（アイコン 1024）
   - game-screens.js：図鑑 renderZukan／引き出し openDrawer・closeDrawers／カード・メニュー openCard・openMenu／タイトル startGame／はじまり frame・start
 - 1つの .js は500行くらいまで。大きくなったら、節（`/* ---------- 〇〇 ---------- */`）の切れ目で分けて、shell.html に「@@include」を足す
 
 ## ビルドと確かめ
+- docs/kobo/gamecenter.json：Game Center のランキング（imo_best＝出荷数）と実績15こ（ja・en-US・点・隠すか）。ios-kobo がビルドのときに読む。ID は一度出したら変えない
+- docs/kobo/achievements/<id>.png：実績のバッジ（1024・RGB）。python3 tools/badges.py で #shot=badge を撮って作る（--sheet <ファイル> で並べた見本）
 - store/app-icon.png：アプリのアイコン（1024・#shot=icon を 1024×1024 の画面で撮ったもの。にこにこいもを変えたら撮りなおす）
 - `node tools/build.mjs`：index.html を作る（Node の標準だけ）
 - `node tools/build.mjs --check`（＝ `npm test`）：index.html が src と同じか
