@@ -133,7 +133,7 @@ function checkAch(){
   if (titleOn) return;
   const got = ACH.filter(a => !S.ach[a.id] && a.v() >= a.n);
   if (!got.length) return;
-  for (const a of got) S.ach[a.id] = 1;
+  for (const a of got){ S.ach[a.id] = 1; gcAch(a.id); }
   S.achNew += got.length; recalc(); renderAchBadge(); restart($('achBadge'), 'pop');
   if (got.length > 2) achQ.push(`${got.length}こ まとめて！`); else for (const a of got) achQ.push(a.name);
   showAchPop(); save();

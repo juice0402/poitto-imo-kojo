@@ -176,7 +176,7 @@ function econTick(dt){
   }
   goalT += dt; if (goalT > .3){ goalT = 0; checkGoal(); }
   achT += dt; if (achT > .5){ achT = 0; checkAch(); if (canPres() && !S.presNotified){ S.presNotified = true; toast('転生できるよ！ 工場 →「転生」へ', 'gold'); SFX.goal(); save(); } }
-  saveT += dt; if (saveT > 5){ saveT = 0; save(); }
+  saveT += dt; if (saveT > 5){ saveT = 0; save(); gcScore(); }
 }
 
 /* ---------- 描く ---------- */

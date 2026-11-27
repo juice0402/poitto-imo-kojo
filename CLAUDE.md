@@ -8,3 +8,4 @@
 - 絵はぜんぶコードで描いたドット絵（ART の表）。絵・音・コインや運のしくみをさわるときは claude/game-art-rule.md
 - LICENSE は入れない（著作権はしょーくん）
 - ゲーム工房に新しい版を出すときは RELEASES.md のいちばん上に版を足す（マージで Actions がタグと Releases を作る）
+- Game Center：src/game-gc.js と docs/kobo/gamecenter.json（実績の ID は変えない）。バッジは python3 tools/badges.py

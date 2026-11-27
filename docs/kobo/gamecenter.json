@@ -1,0 +1,255 @@
+{
+  "leaderboard": {
+    "id": "imo_best",
+    "name": {
+      "ja": "いもの出荷数",
+      "en-US": "Potatoes Shipped"
+    },
+    "suffix": {
+      "ja": "こ",
+      "en-US": " potatoes"
+    }
+  },
+  "achievements": [
+    {
+      "id": "imo_ship1",
+      "points": 10,
+      "hidden": false,
+      "image": "achievements/imo_ship1.png",
+      "ja": {
+        "name": "ベルトになれた",
+        "before": "芋を100こ出荷する",
+        "after": "芋を100こ出荷した"
+      },
+      "en-US": {
+        "name": "Belt Rookie",
+        "before": "Ship 100 potatoes",
+        "after": "Shipped 100 potatoes"
+      }
+    },
+    {
+      "id": "imo_rare1",
+      "points": 10,
+      "hidden": false,
+      "image": "achievements/imo_rare1.png",
+      "ja": {
+        "name": "キラキラ好き",
+        "before": "レア芋を10こつかまえる",
+        "after": "レア芋を10こつかまえた"
+      },
+      "en-US": {
+        "name": "Sparkle Lover",
+        "before": "Catch 10 rare potatoes",
+        "after": "Caught 10 rare potatoes"
+      }
+    },
+    {
+      "id": "imo_fev1",
+      "points": 10,
+      "hidden": false,
+      "image": "achievements/imo_fev1.png",
+      "ja": {
+        "name": "はじめてのお祭り",
+        "before": "フィーバーを1回おこす",
+        "after": "フィーバーを1回おこした"
+      },
+      "en-US": {
+        "name": "First Festival",
+        "before": "Start a fever once",
+        "after": "Started a fever"
+      }
+    },
+    {
+      "id": "imo_flick2",
+      "points": 25,
+      "hidden": false,
+      "image": "achievements/imo_flick2.png",
+      "ja": {
+        "name": "ポイッの達人",
+        "before": "わる芋を500こポイッする",
+        "after": "わる芋を500こポイッした"
+      },
+      "en-US": {
+        "name": "Toss Master",
+        "before": "Toss 500 bad potatoes",
+        "after": "Tossed 500 bad potatoes"
+      }
+    },
+    {
+      "id": "imo_all10",
+      "points": 25,
+      "hidden": false,
+      "image": "achievements/imo_all10.png",
+      "ja": {
+        "name": "工場そろいぶみ",
+        "before": "施設を10しゅるい建てる",
+        "after": "施設を10しゅるい建てた"
+      },
+      "en-US": {
+        "name": "Full Lineup",
+        "before": "Build 10 kinds of facilities",
+        "after": "Built 10 kinds of facilities"
+      }
+    },
+    {
+      "id": "imo_earn4",
+      "points": 25,
+      "hidden": false,
+      "image": "achievements/imo_earn4.png",
+      "ja": {
+        "name": "いも帝国",
+        "before": "かせいだ合計 1兆円",
+        "after": "かせいだ合計が1兆円になった"
+      },
+      "en-US": {
+        "name": "Potato Empire",
+        "before": "Earn 1 trillion yen in total",
+        "after": "Earned 1 trillion yen in total"
+      }
+    },
+    {
+      "id": "imo_sfev",
+      "points": 25,
+      "hidden": false,
+      "image": "achievements/imo_sfev.png",
+      "ja": {
+        "name": "スーパーお祭り",
+        "before": "スーパーフィーバーを1回おこす",
+        "after": "スーパーフィーバーを1回おこした"
+      },
+      "en-US": {
+        "name": "Super Festival",
+        "before": "Start a super fever once",
+        "after": "Started a super fever"
+      }
+    },
+    {
+      "id": "imo_pres1",
+      "points": 50,
+      "hidden": false,
+      "image": "achievements/imo_pres1.png",
+      "ja": {
+        "name": "あたらしい土地",
+        "before": "転生を1回する",
+        "after": "転生を1回した"
+      },
+      "en-US": {
+        "name": "New Land",
+        "before": "Close the factory and start anew once",
+        "after": "Closed the factory and started anew"
+      }
+    },
+    {
+      "id": "imo_zt50",
+      "points": 50,
+      "hidden": false,
+      "image": "achievements/imo_zt50.png",
+      "ja": {
+        "name": "いも博士",
+        "before": "図鑑を50しゅるいうめる",
+        "after": "図鑑を50しゅるいうめた"
+      },
+      "en-US": {
+        "name": "Potato Scholar",
+        "before": "Fill 50 entries in the encyclopedia",
+        "after": "Filled 50 encyclopedia entries"
+      }
+    },
+    {
+      "id": "imo_play3",
+      "points": 50,
+      "hidden": false,
+      "image": "achievements/imo_play3.png",
+      "ja": {
+        "name": "工場長",
+        "before": "10時間あそぶ",
+        "after": "10時間あそんだ"
+      },
+      "en-US": {
+        "name": "Factory Boss",
+        "before": "Play for 10 hours",
+        "after": "Played for 10 hours"
+      }
+    },
+    {
+      "id": "imo_gfev",
+      "points": 50,
+      "hidden": true,
+      "image": "achievements/imo_gfev.png",
+      "ja": {
+        "name": "黄金の時間",
+        "before": "黄金フィーバーを1回おこす",
+        "after": "黄金フィーバーを1回おこした"
+      },
+      "en-US": {
+        "name": "Golden Hour",
+        "before": "Start a golden fever once",
+        "after": "Started a golden fever"
+      }
+    },
+    {
+      "id": "imo_mabo",
+      "points": 50,
+      "hidden": true,
+      "image": "achievements/imo_mabo.png",
+      "ja": {
+        "name": "まぼろしを見た",
+        "before": "まぼろしいもをつかまえる",
+        "after": "まぼろしいもをつかまえた"
+      },
+      "en-US": {
+        "name": "Phantom Sighting",
+        "before": "Catch the phantom potato",
+        "after": "Caught the phantom potato"
+      }
+    },
+    {
+      "id": "imo_dfev",
+      "points": 100,
+      "hidden": true,
+      "image": "achievements/imo_dfev.png",
+      "ja": {
+        "name": "ダイヤモンドの時間",
+        "before": "ダイヤモンドフィーバーを1回おこす",
+        "after": "ダイヤモンドフィーバーを1回おこした"
+      },
+      "en-US": {
+        "name": "Diamond Time",
+        "before": "Start a diamond fever once",
+        "after": "Started a diamond fever"
+      }
+    },
+    {
+      "id": "imo_all20",
+      "points": 100,
+      "hidden": false,
+      "image": "achievements/imo_all20.png",
+      "ja": {
+        "name": "すべてがそろった",
+        "before": "施設をぜんぶのしゅるい建てる",
+        "after": "施設をぜんぶのしゅるい建てた"
+      },
+      "en-US": {
+        "name": "Everything Built",
+        "before": "Build every kind of facility",
+        "after": "Built every kind of facility"
+      }
+    },
+    {
+      "id": "imo_zkr",
+      "points": 100,
+      "hidden": false,
+      "image": "achievements/imo_zkr.png",
+      "ja": {
+        "name": "キラキラ大集合",
+        "before": "レア芋をぜんぶ図鑑にのせる",
+        "after": "レア芋をぜんぶ図鑑にのせた"
+      },
+      "en-US": {
+        "name": "Sparkle Collection",
+        "before": "Add every rare potato to the encyclopedia",
+        "after": "Added every rare potato to the encyclopedia"
+      }
+    }
+  ]
+}
